@@ -37,7 +37,7 @@ import java.util.Vector;
  * @author Matt Kimmel
  */
 class Zax extends Frame implements ZUserInterface {
-	static String versionString = "0.9";
+	static String versionString = "0.91";
     ZCPU cpu;
     TextScreen screen; // The main screen
     ZaxWindow[] windows;  // Z-Machine Windows.
