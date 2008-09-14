@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="zax" default="all">
+  
+  
+  <property file="zax.properties"/>
+  <!-- Uncomment the following property if no tests compilation is needed -->
+  <!-- 
+  <property name="skip.tests" value="true"/>
+   -->
+  
+  <!-- Compiler options -->
+  
+  <property name="compiler.debug" value="on"/>
+  <property name="compiler.generate.no.warnings" value="off"/>
+  <property name="compiler.args" value=""/>
+  <property name="compiler.max.memory" value="128m"/>
+  <patternset id="ignored.files">
+    <exclude name="**/CVS/**"/>
+    <exclude name="**/SCCS/**"/>
+    <exclude name="**/RCS/**"/>
+    <exclude name="**/rcs/**"/>
+    <exclude name="**/.DS_Store/**"/>
+    <exclude name="**/.svn/**"/>
+    <exclude name="**/.sbas/**"/>
+    <exclude name="**/.IJI.*/**"/>
+    <exclude name="**/vssver.scc/**"/>
+    <exclude name="**/vssver2.scc/**"/>
+  </patternset>
+  <patternset id="compiler.resources">
+    <include name="**/?*.properties"/>
+    <include name="**/?*.xml"/>
+    <include name="**/?*.gif"/>
+    <include name="**/?*.png"/>
+    <include name="**/?*.jpeg"/>
+    <include name="**/?*.jpg"/>
+    <include name="**/?*.html"/>
+    <include name="**/?*.dtd"/>
+    <include name="**/?*.tld"/>
+  </patternset>
+  
+  <!-- Modules -->
+  
+  
+  <!-- Module Zax -->
+  
+  <dirname property="module.zax.basedir" file="${ant.file}"/>
+  
+  
+  
+  <property name="compiler.args.zax" value="${compiler.args}"/>
+  
+  <property name="zax.output.dir" value="${module.zax.basedir}/out/production/Zax"/>
+  <property name="zax.testoutput.dir" value="${module.zax.basedir}/out/test/Zax"/>
+  
+  <path id="zax.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="zax.module.classpath"/>
+  
+  <path id="zax.runtime.module.classpath">
+    <pathelement location="${zax.output.dir}"/>
+    <pathelement location="${zax.testoutput.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.zax">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.zax">
+    <patternset refid="excluded.from.module.zax"/>
+  </patternset>
+  
+  <path id="zax.module.sourcepath">
+    <dirset dir="${module.zax.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.zax" depends="compile.module.zax.production,compile.module.zax.tests" description="Compile module Zax"/>
+  
+  <target name="compile.module.zax.production" description="Compile module Zax; production classes">
+    <mkdir dir="${zax.output.dir}"/>
+    <javac destdir="${zax.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
+      <compilerarg line="${compiler.args.zax}"/>
+      <bootclasspath refid="zax.module.bootclasspath"/>
+      <classpath refid="zax.module.classpath"/>
+      <src refid="zax.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.zax"/>
+    </javac>
+    
+    <copy todir="${zax.output.dir}">
+      <fileset dir="${module.zax.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.zax.tests" depends="compile.module.zax.production" description="compile module Zax; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.zax" description="cleanup module">
+    <delete dir="${zax.output.dir}"/>
+    <delete dir="${zax.testoutput.dir}"/>
+  </target>
+  
+  <target name="init" description="Build initialization">
+    <!-- Perform any build initialization in this target -->
+  </target>
+  
+  <target name="clean" depends="clean.module.zax" description="cleanup all"/>
+  
+  <target name="all" depends="init, clean, compile.module.zax" description="build all"/>
+</project>
