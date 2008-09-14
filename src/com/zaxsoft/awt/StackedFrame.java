@@ -1,28 +1,31 @@
-// $Header: /Users/matt/cvsroot/JavaLib/awt/StackedFrame.java,v 1.3 2000/05/07 20:55:53 matt Exp $
-//
-// StackedFrame is a subclass of Frame which overrides some of the Container
-// methods to insure that its components are drawn in descending order; that is,
-// the components will be stacked such that component 0 is on top; component 1
-// is under that, component 2 is under that, and so on.  java.awt.Container
-// currently makes no such guarantees.
-//
-// Copyright (c) 1997-2000, Matthew E. Kimmel.
-//
-// $Log: StackedFrame.java,v $
-// Revision 1.3  2000/05/07 20:55:53  matt
-// Changed package to ZaxSoft.awt
-//
-// Revision 1.2  2000/05/07 20:24:57  matt
-// Put under source control
-//
-//
+/**
+ * Copyright (c) 2008 Matthew E. Kimmel
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.zaxsoft.awt;
 
-import java.awt.Frame;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Rectangle;
+import java.awt.*;
 
+/**
+ * @author Matt Kimmel
+ */
 public class StackedFrame extends java.awt.Frame {
 	// Paint all components in the proper order.
 	public void paintComponents(Graphics gc)

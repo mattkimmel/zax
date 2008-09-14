@@ -1,32 +1,42 @@
-// $Header: /Users/matt/cvsroot/JavaLib/ZMachine/ZCPU.java,v 1.3 2000/05/07 20:58:41 matt Exp $
-//
-// ZCPU - The ZCPU class implements the Central Processing Unit
-// of a ZMachine, and is the ZMachine's interface to the outside
-// world.  With the assistance of other classes in the zmachine
-// package, and of a class supplied by the programmer that implements
-// the ZUserInterface interface, this class loads and executes
-// Z-code programs in the standard Infocom/Inform story-file format.
-//
-// The ZMachine package will currently play games of versions 1-8
-// (except 6).
-//
-// Copyright (c) 1996-2000, Matthew E. Kimmel.
-//
-// $Log: ZCPU.java,v $
-// Revision 1.3  2000/05/07 20:58:41  matt
-// Changed package to Zaxsoft.ZMachine
-//
-// Revision 1.2  2000/05/07 20:25:07  matt
-// Put under source control
-//
-//
+/**
+ * Copyright (c) 2008 Matthew E. Kimmel
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.zaxsoft.zmachine;
 
-import java.util.*;
+import java.awt.*;
 import java.io.*;
-import java.awt.Dimension;
-import java.awt.Point;
+import java.util.Stack;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
+/**
+ * The ZCPU class implements the Central Processing Unit
+ * of a ZMachine, and is the ZMachine's interface to the outside
+ * world.  With the assistance of other classes in the zmachine
+ * package, and of a class supplied by the programmer that implements
+ * the ZUserInterface interface, this class loads and executes
+ * Z-code programs in the standard Infocom/Inform story-file format.
+ *
+ * @author Matt Kimmel
+ */
 public class ZCPU extends Object implements Runnable {
     // Private constants
     // Opcode types

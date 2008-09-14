@@ -1,25 +1,31 @@
-// $Header: /Users/matt/cvsroot/JavaLib/awt/TextScreen.java,v 1.3 2000/05/07 20:55:53 matt Exp $
-//
-// TextScreen widget
-//
-// Based on earlier versions, but completely rewritten for JDK 1.1.
-//
-// The TextScreen widget provides functionality similar to a DOS text-mode
-// screen.  Text may be drawn, the cursor may be moved, a visible cursor
-// is provided, text can be scrolled, etc.  In addition, regions may be defined
-// within the screen, and it may be specified that some operations, such
-// as scrolling and clearing, only affect the active region.  See below
-// for further documentation.
-//
-// Copyright (c) 1998-2000, Matthew E. Kimmel
-//
-// $Header: /Users/matt/cvsroot/JavaLib/awt/TextScreen.java,v 1.3 2000/05/07 20:55:53 matt Exp $
-//
+/**
+ * Copyright (c) 2008 Matthew E. Kimmel
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.zaxsoft.awt;
 
 import java.awt.*;
-import java.util.*;
-import java.awt.image.*;
+import java.awt.image.CropImageFilter;
+import java.awt.image.FilteredImageSource;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 /** The TextScreen class is an extension of the Java AWT Component class which
     provides the functionality of a text screen (similar to DOS in text mode),
@@ -40,7 +46,7 @@ import java.awt.image.*;
         TextScreen.AUTOWRAP - Wrap at end of line.  For best results, don't use this.
         
     @see java.awt.Canvas
-    @author Matthew E. Kimmel
+    @author Matt Kimmel
 */
 
 public class TextScreen extends java.awt.Component

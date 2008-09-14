@@ -1,25 +1,41 @@
+/**
+ * Copyright (c) 2008 Matthew E. Kimmel
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.zaxsoft.apps.zax;
-// $Header: /Users/matt/cvsroot/Zax/Zax.java,v 1.3 2000/05/08 00:37:48 matt Exp $
-//
-// Zax - Z-Code Application eXecutor.
-//
-// Copyright (c) 1996-2000, Matthew E. Kimmel.
-//
-// $Log: Zax.java,v $
-// Revision 1.3  2000/05/08 00:37:48  matt
-// Changed package names to ZaxSoft.*
-//
-// Revision 1.2  2000/05/07 20:26:14  matt
-// Put under source control
-//
-//
-import java.awt.*;
-import java.util.*;
 
 import com.zaxsoft.awt.TextScreen;
 import com.zaxsoft.zmachine.ZCPU;
 import com.zaxsoft.zmachine.ZUserInterface;
 
+import java.awt.*;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
+/**
+ * Zax main class.
+ *
+ * @author Matt Kimmel
+ */
 class Zax extends Frame implements ZUserInterface {
 	static String versionString = "0.9";
     ZCPU cpu;
@@ -713,28 +729,4 @@ class Zax extends Frame implements ZUserInterface {
 	{
 		initialize(version);
 	}
-}
-
-
-// Class containing information about the Z-Machine's logical
-// windows.  In the future, there may be more data here.
-class ZaxWindow extends Object {
-    // Various state information maintained when window is not current
-    public Rectangle shape; // This Z-window's position and size
-    public Point cursorPosition; // Real cursor position associated with window
-    public int tstyle; // Current text style    
-    // Constructor
-    public ZaxWindow()
-    {
-        shape = new Rectangle(0,0,0,0);
-        cursorPosition = new Point(0,0);
-        tstyle = 0;
-    }
-    
-    public ZaxWindow(int x,int y,int w,int h)
-    {
-        shape = new Rectangle(x,y,w,h);
-        cursorPosition = new Point(0,0);
-        tstyle = 0;
-    }
 }

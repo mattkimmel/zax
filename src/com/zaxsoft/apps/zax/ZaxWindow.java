@@ -19,27 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zaxsoft.zmachine;
+package com.zaxsoft.apps.zax;
 
-import java.util.Stack;
+import java.awt.*;
 
 /**
- * A frame on the ZMachine's call stack.
+ * Class containing information about the Z-Machine's logical
+ * windows.  In the future, there may be more data here.
  *
  * @author Matt Kimmel
  */
-class ZCallFrame {
-    // Constants used with calltype;
-    static final int FUNCTION = 0;
-    static final int PROCEDURE = 1;
-    static final int INTERRUPT = 2;
+class ZaxWindow extends Object {
+    // Various state information maintained when window is not current
+    public Rectangle shape; // This Z-window's position and size
+    public Point cursorPosition; // Real cursor position associated with window
+    public int tstyle; // Current text style
+    // Constructor
+    public ZaxWindow()
+    {
+        shape = new Rectangle(0,0,0,0);
+        cursorPosition = new Point(0,0);
+        tstyle = 0;
+    }
 
-    // Variables
-    int pc; // Program counter
-    Stack routineStack; // Routine stack
-    int[] localVars = new int[15]; // Local variables
-    int numLocalVars; // Number of local variables
-    int callType; // How this routine was called
-    int argCount; // Argument count
-	int frameNumber; // Used in CATCH and THROW.  First frame is 0, increases from there.
+    public ZaxWindow(int x,int y,int w,int h)
+    {
+        shape = new Rectangle(x,y,w,h);
+        cursorPosition = new Point(0,0);
+        tstyle = 0;
+    }
 }
