@@ -8,6 +8,10 @@ LEGAL STUFF
 
 As of version 0.91, Zax is now open source, licensed under the MIT License.  Please see the accompanying LICENSE.txt file for legal details.
 
+DISCLAIMER
+
+Zax was my first major Java project, and most of it was written in 1996 and 1997. Hence, there are a lot of idioms in the code that are more C-like and less Java-like. Please bear with me; I'm fixing them as I work on the code.
+
 WHAT IS ZAX?
 
 Zax is a Java 2 implementation of the Z-Machine.  An explanation of the Z-Machine is beyond the scope of this document, but in a nutshell, it is a virtual machine that runs programs written in Z-code, which includes all of Infocom's text adventures and a large number of text adventures and other programs written using the Inform compiler.  Information about all of this is available at the Interactive Fiction Archive, at ftp://ftp.gmd.de/if-archive.
