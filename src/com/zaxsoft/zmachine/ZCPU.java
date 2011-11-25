@@ -2919,12 +2919,12 @@ public class ZCPU extends Object implements Runnable {
 			if (match) {
 				memory.putWord((vops[1] + 2 + (numtokens * 4)),(curaddr + (i * dictentrysize))); // Memory location of dictionary entry
 				memory.putByte((vops[1] + 2 + (numtokens * 4) + 2),thistoken.length()); // Length of word
-				memory.putByte((vops[1] + 2 + (numtokens * 4) + 3),(strpos + 2));//1)); // Position in input buffer; see above
+				memory.putByte((vops[1] + 2 + (numtokens * 4) + 3),(strpos + 1)); // Position in input buffer; see above
 			}
 			else if (bit == 0) { // If bit is set, leave the slot alone
 				memory.putWord((vops[1] + 2 + (numtokens * 4)),0);
 				memory.putByte((vops[1] + 2 + (numtokens * 4) + 2),thistoken.length()); // Length of word
-				memory.putByte((vops[1] + 2 + (numtokens * 4) + 3),(strpos + 2));//1)); // Position in input buffer; see above
+				memory.putByte((vops[1] + 2 + (numtokens * 4) + 3),(strpos + 1)); // Position in input buffer; see above
 			}
 
 
