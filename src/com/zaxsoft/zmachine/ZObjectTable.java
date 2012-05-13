@@ -312,11 +312,11 @@ class ZObjectTable extends Object {
         // number of the first property of this object.
         if (prop == 0) {
             propaddr = getPropertyList(obj);
-            // Skip over text header
-            propaddr = propaddr + (memory.fetchByte(propaddr) * 2);
+            // Skip over text-length byte and text header
+            propaddr = propaddr + 1 + (memory.fetchByte(propaddr) * 2);
             // Return the number of the first property.
             // This will work if the property number is 0, too.
-            if (version < 3)
+            if (version < 4)
                 propnum = memory.fetchByte(propaddr) & 0x1f;
             else
                 propnum = memory.fetchByte(propaddr) & 0x3f;
@@ -337,7 +337,7 @@ class ZObjectTable extends Object {
 
         // Now return the number of the next property.  This will
         // return 0 if the property is a 0 byte.
-        if (version < 3)
+        if (version < 4)
             propnum = memory.fetchByte(propaddr) & 0x1f;
         else
             propnum = memory.fetchByte(propaddr) & 0x3f;
