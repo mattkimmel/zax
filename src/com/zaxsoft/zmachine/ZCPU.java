@@ -2916,15 +2916,23 @@ public class ZCPU extends Object implements Runnable {
 				match = false;
 
 			// Store the token.  i still is the dictionary entry number of the matched entry.
-			if (match) {
+            // Sneaky--in v1-4, there is 1 length byte at the front of the input buffer. In v5+,
+            // there are 2. See zop_read.
+            int bufferOffset;
+            if (version <= 4) {
+                bufferOffset = 1;
+            } else {
+                bufferOffset = 2;
+            }
+            if (match) {
 				memory.putWord((vops[1] + 2 + (numtokens * 4)),(curaddr + (i * dictentrysize))); // Memory location of dictionary entry
 				memory.putByte((vops[1] + 2 + (numtokens * 4) + 2),thistoken.length()); // Length of word
-				memory.putByte((vops[1] + 2 + (numtokens * 4) + 3),(strpos + 1)); // Position in input buffer; see above
+                memory.putByte((vops[1] + 2 + (numtokens * 4) + 3),(strpos + bufferOffset)); // Position in input buffer; see above
 			}
 			else if (bit == 0) { // If bit is set, leave the slot alone
 				memory.putWord((vops[1] + 2 + (numtokens * 4)),0);
 				memory.putByte((vops[1] + 2 + (numtokens * 4) + 2),thistoken.length()); // Length of word
-				memory.putByte((vops[1] + 2 + (numtokens * 4) + 3),(strpos + 1)); // Position in input buffer; see above
+				memory.putByte((vops[1] + 2 + (numtokens * 4) + 3),(strpos + bufferOffset)); // Position in input buffer; see above
 			}
 
 
