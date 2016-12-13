@@ -1,0 +1,11 @@
+group 'com.zaxsoft'
+version '0.92-SNAPSHOT'
+
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+}
