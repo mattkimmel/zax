@@ -147,9 +147,9 @@ class Zax extends Frame implements ZUserInterface {
 
     // fatal - print a fatal error message and exit
     // Windows must be initialized!
-    public void fatal(String errmsg)
+    public void fatal(String message)
     {
-        screen.printString("FATAL ERROR: " + errmsg + "\n");
+        screen.printString("FATAL ERROR: " + message + "\n");
         screen.printString("Hit a key to exit.\n");
         screen.readChar();
         System.exit(1);
@@ -159,7 +159,7 @@ class Zax extends Frame implements ZUserInterface {
     // up a status bar and a lower window in V1-2, and an upper
     // and lower window in V3-5,7-8.  Not sure yet what this
     // involves in V6.
-    public void initialize(int ver)
+    public void initialize(int version)
     {
         // Code for restarting goes here.  version is non-zero
         // if this is a restart.
@@ -190,7 +190,7 @@ class Zax extends Frame implements ZUserInterface {
         terminatingCharacters.addElement(new Integer(10));
         
         // Set up the screen, etc
-        version = ver;
+        this.version = version;
         if (screen != null)
             remove(screen);
 		screenSize = new Dimension(80,25); // TODO: better way to set this?
@@ -206,7 +206,7 @@ class Zax extends Frame implements ZUserInterface {
         
         // Depending on which storyfile version this is, we set
         // up differently.
-        if ((version == 1) || (version == 2)) { // V1-2
+        if ((this.version == 1) || (this.version == 2)) { // V1-2
             // For version 1-2, we set up a status bar and a
             // lower window.
             statusBar = new ZaxWindow(0,0,screenSize.width,1);
@@ -222,7 +222,7 @@ class Zax extends Frame implements ZUserInterface {
             statusBar.cursorPosition = new Point(0,0);
             return;
         }
-        if (version == 3) { // V3
+        if (this.version == 3) { // V3
             // For V3, we set up a status bar AND two windows.
             // This all may change.
             statusBar = new ZaxWindow(0,0,screenSize.width,1);
@@ -241,7 +241,7 @@ class Zax extends Frame implements ZUserInterface {
             return;
         }
 
-        if (((version >= 4) && (version <= 8)) && (version != 6)) {
+        if (((this.version >= 4) && (this.version <= 8)) && (this.version != 6)) {
             // V4-5,7-8; Use an upper window and a lower window.
             windows = new ZaxWindow[2];
             windows[0] = new ZaxWindow(0,1,screenSize.width,screenSize.height-1);
@@ -265,15 +265,15 @@ class Zax extends Frame implements ZUserInterface {
     // Sets the terminating characters for READ operations (other than
     // CR).  Translates from Z-Characters to Event characters by
     // enumerating through the inputCharacter table.
-    public void setTerminatingCharacters(Vector chars)
+    public void setTerminatingCharacters(Vector characters)
     {
         Integer c;
         Integer key, element;
         Enumeration e;
         boolean found;
         
-        for (int i = 0;i < chars.size();i++) {
-            c = (Integer)chars.elementAt(i);
+        for (int i = 0; i < characters.size(); i++) {
+            c = (Integer) characters.elementAt(i);
 
             // We don't bother using the Hashtable contains() method--
             // that just makes this whole thing more expensive.
@@ -362,7 +362,7 @@ class Zax extends Frame implements ZUserInterface {
 
     // Show the status bar (it is guaranteed that this will only
     // be called during a V1-3 game).
-    public void showStatusBar(String s,int a,int b,boolean flag)
+    public void showStatusBar(String s, int a, int b, boolean flag)
     {
 		String status;
 		String s1, s2, s3;
@@ -436,7 +436,7 @@ class Zax extends Frame implements ZUserInterface {
     // nonzero, time out after time tenths of a second.  Return 0
     // if a timeout occurred, or the terminating character if it
     // did not.
-    public int readLine(StringBuffer sb,int time)
+    public int readLine(StringBuffer buffer, int time)
     {
         int rc;
         Integer zc;
@@ -444,9 +444,9 @@ class Zax extends Frame implements ZUserInterface {
         moreLines = 0;
         screen.requestFocus();
         if (time == 0)
-            rc = screen.readLine(sb);
+            rc = screen.readLine(buffer);
         else
-            rc = screen.readLine(sb,(long)(time * 100));
+            rc = screen.readLine(buffer,(long)(time * 100));
         if (rc == -2)
             fatal("Unspecified input error");
         if (rc == -1)
@@ -668,7 +668,7 @@ class Zax extends Frame implements ZUserInterface {
     }
     
 	// Set the current colors
-	public void setColor(int fg,int bg)
+	public void setColor(int foreground, int background)
 	{
 		System.out.println("Ignored a SET_COLOR!");
 	}
