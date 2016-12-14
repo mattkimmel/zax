@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2008 Matthew E. Kimmel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -13,7 +13,7 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -23,32 +23,19 @@ package com.zaxsoft.zmachine;
 
 import java.util.Random;
 
-class ZRandom extends Object {
-    private ZUserInterface zui;
-    private Random rnd;
+class ZRandom {
+    private Random random = new Random();
 
-    // The initialize function performs necessary initialization
-    // (if any).  It is passed the ZUserInterface object for this
-    // ZMachine.
-    void initialize(ZUserInterface ui)
-    {
-        zui = ui;
-        rnd = new Random();
+    // Seed the random number generator. If seed == 0, use an outside source.
+    void seed(int seed) {
+        if (seed == 0) {
+            random = new Random();
+        } else {
+            random = new Random((long) seed);
+        }
     }
 
-    // Seed the random number generator with s.  If s == 0, use
-    // an outside source.
-    void seed(int s)
-    {
-        if (s == 0)
-            rnd = new Random();
-        else
-            rnd = new Random((long)s);
-    }
-
-    // Get a random number between 1 and s, inclusive.
-    int getRandom(int s)
-    {
-		return (Math.abs(rnd.nextInt()) % s) + 1;
+    int getRandom(int inclusiveUpperBound) {
+        return random.nextInt(inclusiveUpperBound) + 1;
     }
 }
