@@ -17,7 +17,7 @@ dependencies {
 jar {
     manifest {
         attributes(
-                "Implementation-Title": "Gradle",
+                "Implementation-Title": "Zax",
                 "Implementation-Version": version,
                 'Main-Class': mainClassName
         )
