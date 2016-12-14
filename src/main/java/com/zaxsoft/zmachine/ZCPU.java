@@ -147,7 +147,6 @@ public class ZCPU extends Object implements Runnable {
             zui.fatal("Unsupported storyfile version: " +
                         String.valueOf(version) + ".");
         zui.initialize(version);
-        rndgen.initialize(zui);
         ioCard.initialize(zui,memory,version,true);
         objTable.initialize(zui,memory,version);
 
