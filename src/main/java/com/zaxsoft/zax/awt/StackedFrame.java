@@ -26,7 +26,7 @@ import java.awt.*;
 /**
  * @author Matt Kimmel
  */
-public class StackedFrame extends java.awt.Frame {
+class StackedFrame extends java.awt.Frame {
 	// Paint all components in the proper order.
 	public void paintComponents(Graphics gc)
 	{

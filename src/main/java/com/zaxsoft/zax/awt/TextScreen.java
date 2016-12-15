@@ -49,7 +49,7 @@ import java.util.Vector;
     @author Matt Kimmel
 */
 
-public class TextScreen extends java.awt.Component
+class TextScreen extends java.awt.Component
 {
     // Public constants
     // Attributes
