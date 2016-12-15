@@ -1,4 +1,4 @@
-package com.zaxsoft.zmachine;
+package com.zaxsoft.zax.zmachine;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

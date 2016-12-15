@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zaxsoft.zmachine;
+package com.zaxsoft.zax.zmachine;
 
 /**
  * ZObjectTable - Encapsulation of the Z-Machine object table.

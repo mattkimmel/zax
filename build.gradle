@@ -5,7 +5,7 @@ apply plugin: 'java'
 apply plugin: 'application'
 
 //noinspection GroovyUnusedAssignment
-mainClassName = 'com.zaxsoft.apps.zax.Zax'
+mainClassName = 'com.zaxsoft.zax.Zax'
 
 repositories {
     mavenCentral()

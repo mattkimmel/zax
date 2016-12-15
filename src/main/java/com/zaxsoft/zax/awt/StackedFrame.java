@@ -19,27 +19,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zaxsoft.zmachine;
+package com.zaxsoft.zax.awt;
 
-import java.util.Stack;
+import java.awt.*;
 
 /**
- * A frame on the ZMachine's call stack.
- *
  * @author Matt Kimmel
  */
-class ZCallFrame {
-    // Constants used with calltype;
-    static final int FUNCTION = 0;
-    static final int PROCEDURE = 1;
-    static final int INTERRUPT = 2;
+public class StackedFrame extends java.awt.Frame {
+	// Paint all components in the proper order.
+	public void paintComponents(Graphics gc)
+	{
+		Component[] comps;
+		Graphics compgc;
+		Rectangle b;
+		
+		comps = getComponents();
+		for (int i = (comps.length - 1);i >= 0;i--) {
+			if (comps[i] == null)
+				continue;
+			b = comps[i].bounds();
+			compgc = gc.create(b.x,b.y,b.width,b.height);
+			comps[i].paintAll(compgc);
+			compgc.dispose();
+		}
+	}
 
-    // Variables
-    int pc; // Program counter
-    Stack routineStack; // Routine stack
-    int[] localVars = new int[15]; // Local variables
-    int numLocalVars; // Number of local variables
-    int callType; // How this routine was called
-    int argCount; // Argument count
-	int frameNumber; // Used in CATCH and THROW.  First frame is 0, increases from there.
+	// Print all components in the proper order.
+	public void printComponents(Graphics gc)
+	{
+		Component[] comps;
+		Graphics compgc;
+		Rectangle b;
+		
+		comps = getComponents();
+		for (int i = (comps.length - 1);i >= 0;i--) {
+			if (comps[i] == null)
+				continue;
+			b = comps[i].bounds();
+			compgc = gc.create(b.x,b.y,b.width,b.height);
+			comps[i].printAll(compgc);
+			compgc.dispose();
+		}
+	}
 }

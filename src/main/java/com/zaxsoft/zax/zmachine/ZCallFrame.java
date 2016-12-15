@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2008 Matthew E. Kimmel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -13,29 +13,33 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zaxsoft.zmachine;
+package com.zaxsoft.zax.zmachine;
 
-import java.util.Random;
+import java.util.Stack;
 
-class ZRandom {
-    private Random random = new Random();
+/**
+ * A frame on the ZMachine's call stack.
+ *
+ * @author Matt Kimmel
+ */
+class ZCallFrame {
+    // Constants used with calltype;
+    static final int FUNCTION = 0;
+    static final int PROCEDURE = 1;
+    static final int INTERRUPT = 2;
 
-    // Seed the random number generator. If seed == 0, use an outside source.
-    void seed(int seed) {
-        if (seed == 0) {
-            random = new Random();
-        } else {
-            random = new Random((long) seed);
-        }
-    }
-
-    int getRandom(int inclusiveUpperBound) {
-        return random.nextInt(inclusiveUpperBound) + 1;
-    }
+    // Variables
+    int pc; // Program counter
+    Stack routineStack; // Routine stack
+    int[] localVars = new int[15]; // Local variables
+    int numLocalVars; // Number of local variables
+    int callType; // How this routine was called
+    int argCount; // Argument count
+	int frameNumber; // Used in CATCH and THROW.  First frame is 0, increases from there.
 }
