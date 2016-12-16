@@ -31,12 +31,12 @@ import java.awt.*;
  */
 class AwtWindow {
     // Various state information maintained when window is not current
-    public Rectangle shape; // This Z-window's position and size
-    public Point cursorPosition; // Real cursor position associated with window
-    public int tstyle; // Current text style
+    Rectangle shape; // This Z-window's position and size
+    Point cursorPosition; // Real cursor position associated with window
+    int tstyle; // Current text style
 
-    public AwtWindow(int x, int y, int w, int h) {
-        shape = new Rectangle(x, y, w, h);
+    AwtWindow(int x, int y, int width, int height) {
+        shape = new Rectangle(x, y, width, height);
         cursorPosition = new Point(0, 0);
         tstyle = 0;
     }
