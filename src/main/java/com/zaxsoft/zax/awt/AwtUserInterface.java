@@ -36,7 +36,6 @@ import com.zaxsoft.zax.zmachine.ZUserInterface;
  * @author Matt Kimmel
  */
 public class AwtUserInterface extends Frame implements ZUserInterface {
-	static String versionString = "0.91";
     ZCPU cpu;
     TextScreen screen; // The main screen
     AwtWindow[] windows;  // Z-Machine Windows.
@@ -49,23 +48,18 @@ public class AwtUserInterface extends Frame implements ZUserInterface {
     Vector terminatingCharacters; // List of terminating characters for READ operations
 	Thread cpuThread = null; // Thread of ZMachine CPU
     
-	public AwtUserInterface() {
-		// Set up the frame.
-		setTitle("Zax v" + versionString);
+    public void start(String zaxVersion) {
+        setTitle("Zax v" + zaxVersion);
 
-		// Construct a menu bar
-		MenuBar mb = new MenuBar();
-		Menu m = new Menu("File");
-		m.add("Play Story...");
-		m.addSeparator();
-		m.add("Exit");
-		mb.add(m);
-//		m = new Menu("Help");
-//		m.add("About");
-//		mb.setHelpMenu(m);
-		setMenuBar(mb);
-        
-		// Put a screen up-this screen will be replaced later.
+        MenuBar menuBar = new MenuBar();
+        Menu menu = new Menu("File");
+        menu.add("Play Story...");
+        menu.addSeparator();
+        menu.add("Exit");
+        menuBar.add(menu);
+        setMenuBar(menuBar);
+
+        // Put a screen up-this screen will be replaced later.
         setResizable(false);
         screen = new TextScreen(new Font("Monospaced",Font.PLAIN,12), Color.blue, Color.white, 25, 80, 0);
         add(screen);
@@ -73,9 +67,9 @@ public class AwtUserInterface extends Frame implements ZUserInterface {
         setSize(ins.left + ins.right + screen.getPreferredSize().width,
                 ins.top + ins.bottom + screen.getPreferredSize().height);
         show();
-	}
+    }
 
-	// Handle menu events
+    // Handle menu events
 	public boolean action(Event event, Object what) {
 		// See if this is a menu event
 		if ("Play Story...".equals(what)) { // Play a story file
