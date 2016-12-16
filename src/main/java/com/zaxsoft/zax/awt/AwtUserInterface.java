@@ -41,7 +41,7 @@ public class AwtUserInterface extends Frame implements ZUserInterface {
     private AwtWindow curWindow; // The current window.
     private AwtWindow statusBar; // The status bar, in V1-3
     private Dimension screenSize; // Size of the entire screen in characters
-    private int version = 0;    // Version of this storyfile - 0 if game not yet initialized.
+    private int version = 0;    // Version of this story file - 0 if game not yet initialized.
     private int moreLines = 0; // Number of lines before next MORE
     private Hashtable inputCharacters; // Used to translate between Event input characters and Z-Machine input characters
     private Vector terminatingCharacters; // List of terminating characters for READ operations

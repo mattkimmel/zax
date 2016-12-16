@@ -13,6 +13,7 @@ class Zax {
     }
 
     void run(String version) {
-        userInterface.start(version == null ? "" : version);
+        String zaxVersion = version == null ? "" : version;
+        userInterface.start(zaxVersion);
     }
 }
