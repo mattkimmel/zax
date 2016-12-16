@@ -465,7 +465,7 @@ public class AwtUserInterface extends Frame implements ZUserInterface {
 
     // Display a string -- this method does a number of things, including scrolling only
 	// as necessary, word-wrapping, and "more".
-    public void showString(String s)
+    public void showString(String string)
     {
 		Point cursor;
 		String outstr, curtoken;
@@ -476,7 +476,7 @@ public class AwtUserInterface extends Frame implements ZUserInterface {
 		// If this is not window 0, the output window, then we don't do any special
 		// handling.  Is this correct?  Probably not in V6.
 		if (curWindow != windows[0]) {
-			screen.printString(s);
+			screen.printString(string);
 			return;
 		}
 
@@ -494,7 +494,7 @@ public class AwtUserInterface extends Frame implements ZUserInterface {
 		// Now, go through the string as a series of tokens.  Word-wrap, scroll, and
 		// "more" as necessary.
 		outstr = new String();
-		intokens = new StringTokenizer(s,"\n ",true);
+		intokens = new StringTokenizer(string,"\n ",true);
 		while (intokens.hasMoreTokens()) {
 			curtoken = intokens.nextToken();
 			if (curtoken.equals("\n")) {

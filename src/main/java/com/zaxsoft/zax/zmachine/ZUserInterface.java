@@ -133,14 +133,14 @@ public interface ZUserInterface {
     int readChar(int time);
 
     // Print a string
-    void showString(String s);
+    void showString(String string);
 
     // This method scrolls the current window by the specified
     // number of lines.
     void scrollWindow(int lines);
 
     // This method erases a line in the current window.
-    void eraseLine(int s);
+    void eraseLine(int size);
 
 	// This method erases the current window.
 	void eraseWindow(int window);
@@ -156,7 +156,7 @@ public interface ZUserInterface {
     void quit();
 
 	// This function is called when the Z-Machine is about to
-	// restart.  The UI should prepare by reseting itself to
+	// restart.  The UI should prepare by resetting itself to
 	// an initial state.  The function should return.
 	void restart();
 }
