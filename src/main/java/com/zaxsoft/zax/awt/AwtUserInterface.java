@@ -36,20 +36,19 @@ import com.zaxsoft.zax.zmachine.ZUserInterface;
  * @author Matt Kimmel
  */
 public class AwtUserInterface extends Frame implements ZUserInterface {
-    ZCPU cpu;
-    TextScreen screen; // The main screen
-    AwtWindow[] windows;  // Z-Machine Windows.
-    AwtWindow curWindow; // The current window.
-    AwtWindow statusBar; // The status bar, in V1-3
-	Dimension screenSize; // Size of the entire screen in characters
-    int version = 0;    // Version of this storyfile - 0 if game not yet initialized.
-    int moreLines = 0; // Number of lines before next MORE
-    Hashtable inputCharacters; // Used to translate between Event input characters and Z-Machine input characters
-    Vector terminatingCharacters; // List of terminating characters for READ operations
-	Thread cpuThread = null; // Thread of ZMachine CPU
+    private TextScreen screen; // The main screen
+    private AwtWindow[] windows;  // Z-Machine Windows.
+    private AwtWindow curWindow; // The current window.
+    private AwtWindow statusBar; // The status bar, in V1-3
+    private Dimension screenSize; // Size of the entire screen in characters
+    private int version = 0;    // Version of this storyfile - 0 if game not yet initialized.
+    private int moreLines = 0; // Number of lines before next MORE
+    private Hashtable inputCharacters; // Used to translate between Event input characters and Z-Machine input characters
+    private Vector terminatingCharacters; // List of terminating characters for READ operations
+    private Thread cpuThread = null; // Thread of ZMachine CPU
     
     public void start(String zaxVersion) {
-        setTitle("Zax v" + zaxVersion);
+        setTitle("Zax " + (zaxVersion.length() == 0 ? "" : "v" + zaxVersion));
 
         MenuBar menuBar = new MenuBar();
         Menu menu = new Menu("File");
@@ -93,7 +92,7 @@ public class AwtUserInterface extends Frame implements ZUserInterface {
 			return;
 
 		// Create a ZMachine instance
-        cpu = new ZCPU(this);
+        ZCPU cpu = new ZCPU(this);
 
 		// Allow the user to select a story file
 		fd = new FileDialog(this,"Open a Storyfile",FileDialog.LOAD);
