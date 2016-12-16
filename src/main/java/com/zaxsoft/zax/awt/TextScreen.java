@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2008 Matthew E. Kimmel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -27,7 +27,7 @@ import java.awt.image.FilteredImageSource;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-/** The TextScreen class is an extension of the Java AWT Component class which
+/* The TextScreen class is an extension of the Java AWT Component class which
     provides the functionality of a text screen (similar to DOS in text mode),
     which can print text and optionally scroll up or down.  Methods are also
     provided to read and optionally echo keyboard input.  In addition, "regions"

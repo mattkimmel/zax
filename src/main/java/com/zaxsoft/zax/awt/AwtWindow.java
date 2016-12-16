@@ -23,7 +23,7 @@ package com.zaxsoft.zax.awt;
 
 import java.awt.*;
 
-/**
+/*
  * Class containing information about the Z-Machine's logical
  * windows.  In the future, there may be more data here.
  *
