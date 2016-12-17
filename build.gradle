@@ -21,6 +21,7 @@ dependencies {
 }
 
 jar {
+    from sourceSets.main.allSource
     manifest {
         attributes(
                 "Implementation-Title": "Zax",
