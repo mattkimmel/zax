@@ -1,5 +1,5 @@
 group 'com.zaxsoft'
-version "0.92-SNAPSHOT"
+version "0.92-SNAPSHOT-5"
 
 apply plugin: 'java'
 apply plugin: 'application'
