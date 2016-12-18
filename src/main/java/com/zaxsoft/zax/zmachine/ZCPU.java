@@ -37,7 +37,7 @@ import java.util.Vector;
  *
  * @author Matt Kimmel
  */
-public class ZCPU extends Object implements Runnable {
+public class ZCPU implements Runnable {
     // Private constants
     // Opcode types
     private static final int OPTYPE_0OP = 0; // 0OP opcode type
@@ -59,7 +59,7 @@ public class ZCPU extends Object implements Runnable {
     private ZUserInterface userInterface; // User interface supplied to constructor
 
     // Private variables
-    private String curStoryFile; // The storyfile we're using
+    private String storyFilePath;
     private int version = 0; // Version of the game we're playing.
     private int programScale; // Scaling factor for this program
     private ZCallFrame curCallFrame; // Current call frame
@@ -90,18 +90,27 @@ public class ZCPU extends Object implements Runnable {
     private int alphabetU = 1;
     private int alphabetP = 2; // Set to 3 in V1
     private char[][] alphabet = {
-        { ' ','\0','\0','\0','\0','\0','a','b','c','d','e','f','g','h','i',
-          'j','k','l','m','n','o','p','q','r','s','t','u','v','w',
-          'x','y','z' },
-        { ' ','\0','\0','\0','\0','\0','A','B','C','D','E','F','G','H','I',
-          'J','K','L','M','N','O','P','Q','R','S','T','U','V','W',
-          'X','Y','Z' },
-        { ' ','\0','\0','\0','\0','\0','\0','\n','0','1','2','3','4','5','6','7',
-          '8','9','.',',','!','?','_','#','\'','\"','/','\\','-',
-          ':','(',')'},
-        { ' ','\0','\0','\0','\0','\0','\0','0','1','2','3','4','5','6','7',
-          '8','9','.',',','!','?','_','#','\'','\"','/','\\','<','-',
-          ':','(',')'}
+            {
+                    ' ', '\0', '\0', '\0', '\0', '\0',
+                    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+            },
+            {
+                    ' ', '\0', '\0', '\0', '\0', '\0',
+                    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+                    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+            },
+            {
+                    ' ', '\0', '\0', '\0', '\0', '\0', '\0', '\n',
+                    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                    '.', ',', '!', '?', '_', '#', '\'', '\"', '/', '\\', '-', ':', '(', ')'
+            },
+            {
+
+                    ' ', '\0', '\0', '\0', '\0', '\0', '\0',
+                    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                    '.', ',', '!', '?', '_', '#', '\'', '\"', '/', '\\', '<', '-', ':', '(', ')'
+            }
     };
 
     // The constructor takes an object that implements the
@@ -122,8 +131,7 @@ public class ZCPU extends Object implements Runnable {
     // calls the initialize methods of the other objects; modifies
     // IROM as appropriate to the capabilities of the ZMachine and
     // the ZUserInterface.
-    public void initialize(String storyFile)
-    {
+    public void initialize(String storyFilePath) {
         int i;
         boolean transcriptOn = false;
 		Dimension s;
@@ -132,20 +140,17 @@ public class ZCPU extends Object implements Runnable {
         // If this is a restart, remember the value of the printer
         // transcript bit.
         if (restartFlag) {
-            if ((memory.fetchWord(0x10) & 0x01) == 0x01)
-                transcriptOn = true;
-            else
-                transcriptOn = false;
+            transcriptOn = (memory.fetchWord(0x10) & 0x01) == 0x01;
         }
 
         // First, initialize all of the objects.  For the ZMemory
         // object, this includes loading the game file.
-        curStoryFile = storyFile;
-        memory.initialize(userInterface,storyFile);
+        this.storyFilePath = storyFilePath;
+        memory.initialize(userInterface, storyFilePath);
         version = memory.fetchByte(0x00);
-        if ((version < 1) || (version > 8) || (version == 6))
-            userInterface.fatal("Unsupported storyfile version: " +
-                        String.valueOf(version) + ".");
+        if ((version < 1) || (version > 8) || (version == 6)) {
+            userInterface.fatal("Unsupported story file version: " + version + ".");
+        }
         userInterface.initialize(version);
         ioCard.initialize(userInterface,memory,version,true);
         objTable.initialize(userInterface,memory,version);
@@ -254,7 +259,7 @@ public class ZCPU extends Object implements Runnable {
                 int tc = memory.fetchByte(termChars);
                 Vector terminators = new Vector();
                 while (tc != 0) {
-                    terminators.addElement(new Integer(tc));
+                    terminators.addElement(tc);
                     i++;
                     tc = memory.fetchByte(termChars+i);
                 }
@@ -291,7 +296,7 @@ public class ZCPU extends Object implements Runnable {
 		do {
 			// Reinitialize if this is a restart
 			if (restartFlag) {
-				initialize(curStoryFile);
+				initialize(storyFilePath);
 				restartFlag = false;
 			}
 

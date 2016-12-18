@@ -23,11 +23,11 @@ package com.zaxsoft.zax.zmachine;
 
 import java.io.*;
 
-class ZMemory extends Object {
+class ZMemory {
     private final ZFileLoader fileLoader;
     private ZUserInterface userInterface;
-    byte[] data;
-    int dataLength;
+    private byte[] data;
+    private int dataLength;
 
     ZMemory(ZFileLoader fileLoader) {
         this.fileLoader = fileLoader;
@@ -49,52 +49,48 @@ class ZMemory extends Object {
     }
 
     // Fetch a byte from the specified address
-    int fetchByte(int address)
-    {
-        if (address > (dataLength - 1))
+    int fetchByte(int address) {
+        if (address < 0 || address > (dataLength - 1)) {
             userInterface.fatal("Memory fault: address " + address);
-        int i = (data[address] & 0xff);
-        return i;
+            return 0;
+        } else {
+            return (data[address] & 0xff);
+        }
     }
 
     // Store a byte at the specified address
-    void putByte(int addr,int b)
-    {
-        if (addr > (dataLength - 1))
-            userInterface.fatal("Memory fault: address " + addr);
-        data[addr] = (byte)(b & 0xff);
+    void putByte(int address, int b) {
+        if (address > (dataLength - 1)) {
+            userInterface.fatal("Memory fault: address " + address);
+        }
+        data[address] = (byte) (b & 0xff);
     }
 
     // Fetch a word from the specified address
-    int fetchWord(int addr)
-    {
-        int i;
-
-        if (addr > (dataLength - 1))
-            userInterface.fatal("Memory fault: address " + addr);
-        i = (((data[addr] << 8) | (data[addr+1] & 0xff)) & 0xffff);
-        return i;
+    int fetchWord(int address) {
+        if (address > (dataLength - 1)) {
+            userInterface.fatal("Memory fault: address " + address);
+        }
+        return (((data[address] << 8) | (data[address + 1] & 0xff)) & 0xffff);
     }
 
     // Store a word at the specified address
-    void putWord(int addr,int w)
-    {
-        if (addr > (dataLength - 1))
-            userInterface.fatal("Memory fault: address " + addr);
-        data[addr] = (byte)((w >> 8) & 0xff);
-        data[addr+1] = (byte)(w & 0xff);
+    void putWord(int address, int word) {
+        if (address > (dataLength - 1)) {
+            userInterface.fatal("Memory fault: address " + address);
+        }
+        data[address] = (byte) ((word >> 8) & 0xff);
+        data[address + 1] = (byte) (word & 0xff);
     }
 
-	// Dump the specified amount of memory, starting at the specified address,
-	// to the specified DataOutputStream.
-	void dumpMemory(DataOutputStream dos,int addr,int len) throws IOException
-	{
-		dos.write(data,addr,len);
-	}
+    // Dump the specified amount of memory, starting at the specified address,
+    // to the specified DataOutputStream.
+    void dumpMemory(DataOutputStream dos, int address, int length) throws IOException {
+        dos.write(data, address, length);
+    }
 
-	// Read in memory stored by dumpMemory.
-	void readMemory(DataInputStream dis,int addr,int len) throws IOException
-	{
-		dis.read(data,addr,len);
-	}
+    // Read in memory stored by dumpMemory.
+    void readMemory(DataInputStream dis, int address, int length) throws IOException {
+        dis.read(data, address, length);
+    }
 }
