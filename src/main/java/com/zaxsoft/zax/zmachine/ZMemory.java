@@ -24,43 +24,36 @@ package com.zaxsoft.zax.zmachine;
 import java.io.*;
 
 class ZMemory extends Object {
-    private ZUserInterface zui;
+    private final ZFileLoader fileLoader;
+    private ZUserInterface userInterface;
     byte[] data;
     int dataLength;
+
+    ZMemory(ZFileLoader fileLoader) {
+        this.fileLoader = fileLoader;
+    }
 
     // The initialize routine sets things up and loads a game
     // into memory.  It is passed the ZUserInterface object
     // for this ZMachine and the filename of the story-file.
-    void initialize(ZUserInterface ui,String storyFile)
-    {
-        File f;
-        FileInputStream fis;
-        DataInputStream dis;
-        zui = ui;
+    void initialize(ZUserInterface zUserInterface, String storyFilePath) {
+        userInterface = zUserInterface;
+        ZStory story = fileLoader.load(storyFilePath);
 
-        // Read in the story file
-        f = new File(storyFile);
-        if((!f.exists()) || (!f.canRead()) || (!f.isFile()))
-            zui.fatal("Storyfile " + storyFile + " not found.");
-        dataLength = (int)f.length();
-        data = new byte[dataLength];
-        try {
-            fis = new FileInputStream(f);
-            dis = new DataInputStream(fis);
-            dis.readFully(data,0,dataLength);
-            fis.close();
-        }
-        catch (IOException ioex) {
-            zui.fatal("I/O error loading storyfile.");
+        if (story == ZStory.NOT_FOUND) {
+            userInterface.fatal("Story file '" + storyFilePath + "' not found.");
+        } else {
+            data = story.getStory();
+            dataLength = story.getStory().length;
         }
     }
 
     // Fetch a byte from the specified address
-    int fetchByte(int addr)
+    int fetchByte(int address)
     {
-        if (addr > (dataLength - 1))
-            zui.fatal("Memory fault: address " + addr);
-        int i = (data[addr] & 0xff);
+        if (address > (dataLength - 1))
+            userInterface.fatal("Memory fault: address " + address);
+        int i = (data[address] & 0xff);
         return i;
     }
 
@@ -68,7 +61,7 @@ class ZMemory extends Object {
     void putByte(int addr,int b)
     {
         if (addr > (dataLength - 1))
-            zui.fatal("Memory fault: address " + addr);
+            userInterface.fatal("Memory fault: address " + addr);
         data[addr] = (byte)(b & 0xff);
     }
 
@@ -78,7 +71,7 @@ class ZMemory extends Object {
         int i;
 
         if (addr > (dataLength - 1))
-            zui.fatal("Memory fault: address " + addr);
+            userInterface.fatal("Memory fault: address " + addr);
         i = (((data[addr] << 8) | (data[addr+1] & 0xff)) & 0xffff);
         return i;
     }
@@ -87,7 +80,7 @@ class ZMemory extends Object {
     void putWord(int addr,int w)
     {
         if (addr > (dataLength - 1))
-            zui.fatal("Memory fault: address " + addr);
+            userInterface.fatal("Memory fault: address " + addr);
         data[addr] = (byte)((w >> 8) & 0xff);
         data[addr+1] = (byte)(w & 0xff);
     }
