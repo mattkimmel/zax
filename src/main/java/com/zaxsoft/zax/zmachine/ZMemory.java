@@ -21,7 +21,9 @@
  */
 package com.zaxsoft.zax.zmachine;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 class ZMemory {
     private final ZFileLoader fileLoader;
@@ -55,7 +57,6 @@ class ZMemory {
         }
     }
 
-    // Fetch a byte from the specified address
     int fetchByte(int address) {
         if (address < 0 || address > (dataLength - 1)) {
             userInterface.fatal("Memory fault: address " + address);
@@ -65,7 +66,6 @@ class ZMemory {
         }
     }
 
-    // Store a byte at the specified address
     void putByte(int address, int b) {
         if (address < 0 || address > (dataLength - 1)) {
             userInterface.fatal("Memory fault: address " + address);
@@ -94,14 +94,11 @@ class ZMemory {
         }
     }
 
-    // Dump the specified amount of memory, starting at the specified address,
-    // to the specified DataOutputStream.
-    void dumpMemory(DataOutputStream dos, int address, int length) throws IOException {
-        dos.write(data, address, length);
+    void dumpMemory(DataOutputStream outputStream, int address, int length) throws IOException {
+        outputStream.write(data, address, length);
     }
 
-    // Read in memory stored by dumpMemory.
-    void readMemory(DataInputStream dis, int address, int length) throws IOException {
-        dis.read(data, address, length);
+    void readMemory(DataInputStream inputStream, int address, int length) throws IOException {
+        inputStream.read(data, address, length);
     }
 }

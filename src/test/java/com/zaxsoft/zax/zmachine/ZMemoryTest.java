@@ -6,12 +6,20 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.Random;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class ZMemoryTest {
+    @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder();
     private static final int MEMORY_SIZE = 100;
     private static final int BYTE_LIMIT = 256;
     private static final int WORD_LIMIT = 65536;
@@ -147,22 +155,51 @@ public class ZMemoryTest {
         verify(userInterface).fatal("Memory fault: address " + (MEMORY_SIZE - 1));
     }
 
+    @Test
+    public void writeMemory() throws IOException {
+        byte[] bytes = createBytes();
+        ZMemory memory = new ZMemory(userInterface, bytes);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        DataOutputStream outputStream = new DataOutputStream(out);
+        memory.dumpMemory(outputStream, 0, MEMORY_SIZE);
+
+        assertThat(out.toByteArray(), equalTo(bytes));
+    }
+
+    @Test
+    public void readMemory() throws IOException {
+        byte[] bytes = createBytes();
+        ZMemory memory = new ZMemory(userInterface, createBytes());
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+
+        memory.readMemory(new DataInputStream(inputStream), 0, MEMORY_SIZE);
+
+        for (int i = 0; i < MEMORY_SIZE;i++) {
+            int expected = bytes[i] & 0xff;
+            assertThat(memory.fetchByte(i), equalTo(expected));
+        }
+    }
+
     private ZMemory createMemory() {
         return createMemory(new Random().nextInt(MEMORY_SIZE), new Random().nextInt(BYTE_LIMIT));
     }
 
+    private ZMemory createMemory(int address, int expected) {
+        byte[] bytes = createBytes();
+        bytes[address] = (byte) (expected & 0xff);
+        return new ZMemory(userInterface, bytes);
+    }
+
     private ZMemory createMemoryWord(int address, int word) {
-        byte[] bytes = new byte[MEMORY_SIZE];
-        new Random().nextBytes(bytes);
+        byte[] bytes = createBytes();
         bytes[address] = (byte) ((word >> 8) & 0xff);
         bytes[address + 1] = (byte) (word & 0xff);
         return new ZMemory(userInterface, bytes);
     }
 
-    private ZMemory createMemory(int address, int expected) {
+    private byte[] createBytes() {
         byte[] bytes = new byte[MEMORY_SIZE];
         new Random().nextBytes(bytes);
-        bytes[address] = (byte) (expected & 0xff);
-        return new ZMemory(userInterface, bytes);
+        return bytes;
     }
 }
