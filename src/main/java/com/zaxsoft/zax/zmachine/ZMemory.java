@@ -25,19 +25,26 @@ import java.io.*;
 
 class ZMemory {
     private final ZFileLoader fileLoader;
-    private ZUserInterface userInterface;
+    private final ZUserInterface userInterface;
     private byte[] data;
     private int dataLength;
 
-    ZMemory(ZFileLoader fileLoader) {
+    ZMemory(ZUserInterface userInterface, ZFileLoader fileLoader) {
         this.fileLoader = fileLoader;
+        this.userInterface = userInterface;
+    }
+
+    ZMemory(ZUserInterface userInterface, byte[] storyFileBytes) {
+        this.userInterface = userInterface;
+        this.fileLoader = null;
+        this.data = storyFileBytes;
+        this.dataLength = storyFileBytes.length;
     }
 
     // The initialize routine sets things up and loads a game
     // into memory.  It is passed the ZUserInterface object
     // for this ZMachine and the filename of the story-file.
-    void initialize(ZUserInterface zUserInterface, String storyFilePath) {
-        userInterface = zUserInterface;
+    void initialize(String storyFilePath) {
         ZStory story = fileLoader.load(storyFilePath);
 
         if (story == ZStory.NOT_FOUND) {
@@ -60,27 +67,31 @@ class ZMemory {
 
     // Store a byte at the specified address
     void putByte(int address, int b) {
-        if (address > (dataLength - 1)) {
+        if (address < 0 || address > (dataLength - 1)) {
             userInterface.fatal("Memory fault: address " + address);
+        } else {
+            data[address] = (byte) (b & 0xff);
         }
-        data[address] = (byte) (b & 0xff);
     }
 
     // Fetch a word from the specified address
     int fetchWord(int address) {
-        if (address > (dataLength - 1)) {
+        if (address < 0 || address > (dataLength - 2)) {
             userInterface.fatal("Memory fault: address " + address);
+            return 0;
+        } else {
+            return (((data[address] << 8) | (data[address + 1] & 0xff)) & 0xffff);
         }
-        return (((data[address] << 8) | (data[address + 1] & 0xff)) & 0xffff);
     }
 
     // Store a word at the specified address
     void putWord(int address, int word) {
-        if (address > (dataLength - 1)) {
+        if (address < 0 || address > (dataLength - 2)) {
             userInterface.fatal("Memory fault: address " + address);
+        } else {
+            data[address] = (byte) ((word >> 8) & 0xff);
+            data[address + 1] = (byte) (word & 0xff);
         }
-        data[address] = (byte) ((word >> 8) & 0xff);
-        data[address + 1] = (byte) (word & 0xff);
     }
 
     // Dump the specified amount of memory, starting at the specified address,
