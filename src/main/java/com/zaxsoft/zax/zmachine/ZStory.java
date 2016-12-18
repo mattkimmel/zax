@@ -1,6 +1,6 @@
 package com.zaxsoft.zax.zmachine;
 
-class ZStory {
+public class ZStory {
     static final ZStory NOT_FOUND = new ZStory();
     private final byte[] story;
 
@@ -12,7 +12,7 @@ class ZStory {
         this.story = story;
     }
 
-    byte[] getStory() {
+    public byte[] getStory() {
         return story;
     }
 }

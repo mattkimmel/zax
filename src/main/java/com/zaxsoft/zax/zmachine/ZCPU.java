@@ -113,14 +113,8 @@ public class ZCPU implements Runnable {
             }
     };
 
-    // The constructor takes an object that implements the
-    // ZUserInterface interface as an argument, and initializes
-    // various variables and objects (but does not load or start
-    // a game).
-    public ZCPU(ZUserInterface zUserInterface)
-    {
-        userInterface = zUserInterface;
-        memory = new ZMemory(new ZFileLoader());
+    public ZCPU(ZUserInterface userInterface) {
+        this.userInterface = userInterface;
         callStack = new Stack();
         rndgen = new ZRandom();
         ioCard = new ZIOCard();
@@ -143,10 +137,10 @@ public class ZCPU implements Runnable {
             transcriptOn = (memory.fetchWord(0x10) & 0x01) == 0x01;
         }
 
-        // First, initialize all of the objects.  For the ZMemory
-        // object, this includes loading the game file.
         this.storyFilePath = storyFilePath;
-        memory.initialize(userInterface, storyFilePath);
+        memory = new ZMemory(userInterface, new ZFileLoader().load(storyFilePath).getStory());
+
+        // First, initialize all of the objects.
         version = memory.fetchByte(0x00);
         if ((version < 1) || (version > 8) || (version == 6)) {
             userInterface.fatal("Unsupported story file version: " + version + ".");

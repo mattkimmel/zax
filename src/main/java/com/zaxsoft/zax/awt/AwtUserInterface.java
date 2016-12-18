@@ -28,6 +28,8 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import com.zaxsoft.zax.zmachine.ZCPU;
+import com.zaxsoft.zax.zmachine.ZFileLoader;
+import com.zaxsoft.zax.zmachine.ZStory;
 import com.zaxsoft.zax.zmachine.ZUserInterface;
 
 /**
@@ -82,30 +84,33 @@ public class AwtUserInterface extends Frame implements ZUserInterface {
 	}
 
 	// Play a story file
-    private void playStory()
-    {
-		FileDialog fd;
-		String dir, file, pathname;
+    private void playStory() {
+        // If a story is already running, ignore this (for now)
+        if (cpuThread != null)
+            return;
 
-		// If a story is already running, ignore this (for now)
-		if (cpuThread != null)
-			return;
+        // Allow the user to select a story file
+        FileDialog fileDialog = new FileDialog(this, "Open a Story file", FileDialog.LOAD);
+        fileDialog.setVisible(true);
+        if (fileDialog.getDirectory() == null || fileDialog.getFile() == null) {
+            return;
+        }
+        String pathname =  fileDialog.getDirectory() + fileDialog.getFile();
 
-		// Create a ZMachine instance
         ZCPU cpu = new ZCPU(this);
-
-		// Allow the user to select a story file
-		fd = new FileDialog(this,"Open a Storyfile",FileDialog.LOAD);
-		fd.show();
-		dir = fd.getDirectory();
-		file = fd.getFile();
-		if ((dir == null) || (file == null))
-			return;
-		pathname = dir + file;
 
         cpu.initialize(pathname);
         cpuThread = cpu.start();
 	}
+
+	private String promptForStoryFile() {
+        FileDialog fileDialog = new FileDialog(this, "Open a Story file", FileDialog.LOAD);
+        fileDialog.setVisible(true);
+        if (fileDialog.getDirectory() == null || fileDialog.getFile() == null) {
+            return "";
+        }
+        return fileDialog.getDirectory() + fileDialog.getFile();
+    }
 
     // Private method called when switching windows
     private void switchWindow(AwtWindow w)

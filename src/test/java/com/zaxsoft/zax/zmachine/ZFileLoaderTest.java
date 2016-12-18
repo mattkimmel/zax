@@ -2,11 +2,18 @@ package com.zaxsoft.zax.zmachine;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.notNullValue;
 
+import java.nio.file.AccessDeniedException;
+import java.nio.file.NoSuchFileException;
+
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class ZFileLoaderTest {
+    @Rule public ExpectedException thrown = ExpectedException.none();
     private static final String PATH = "src/test/resources/Test.z8";
     private final ZFileLoader loader = new ZFileLoader();
 
@@ -26,15 +33,17 @@ public class ZFileLoaderTest {
 
     @Test
     public void handleFileNotFound() {
-        ZStory story = loader.load("somefile.txt");
+        thrown.expect(RuntimeException.class);
+        thrown.expectCause(instanceOf(NoSuchFileException.class));
 
-        assertThat(story, equalTo(ZStory.NOT_FOUND));
+        loader.load("somefile.txt");
     }
 
     @Test
     public void handleDirectory() {
-        ZStory story = loader.load(".");
+        thrown.expect(RuntimeException.class);
+        thrown.expectCause(instanceOf(AccessDeniedException.class));
 
-        assertThat(story, equalTo(ZStory.NOT_FOUND));
+        loader.load(".");
     }
 }

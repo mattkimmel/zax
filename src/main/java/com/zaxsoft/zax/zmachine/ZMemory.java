@@ -25,7 +25,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-class ZMemory {
+public class ZMemory {
     private final ZFileLoader fileLoader;
     private final ZUserInterface userInterface;
     private byte[] data;
