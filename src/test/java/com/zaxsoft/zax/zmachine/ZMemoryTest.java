@@ -128,12 +128,12 @@ public class ZMemoryTest {
     @Test
     public void putWord() {
         ZMemory memory = createMemory();
-        int position = new Random().nextInt(MEMORY_SIZE);
-        int expected = new Random().nextInt(BYTE_LIMIT);
+        int position = new Random().nextInt(MEMORY_SIZE - 1);
+        int expected = new Random().nextInt(WORD_LIMIT);
 
-        memory.putByte(position, expected);
+        memory.putWord(position, expected);
 
-        int actual = memory.fetchByte(position);
+        int actual = memory.fetchWord(position);
         assertThat(actual, equalTo(expected));
     }
 
