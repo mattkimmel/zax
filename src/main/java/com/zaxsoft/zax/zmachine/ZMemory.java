@@ -25,36 +25,15 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class ZMemory {
-    private final ZFileLoader fileLoader;
+class ZMemory {
     private final ZUserInterface userInterface;
     private byte[] data;
     private int dataLength;
 
-    ZMemory(ZUserInterface userInterface, ZFileLoader fileLoader) {
-        this.fileLoader = fileLoader;
-        this.userInterface = userInterface;
-    }
-
     ZMemory(ZUserInterface userInterface, byte[] storyFileBytes) {
         this.userInterface = userInterface;
-        this.fileLoader = null;
         this.data = storyFileBytes;
         this.dataLength = storyFileBytes.length;
-    }
-
-    // The initialize routine sets things up and loads a game
-    // into memory.  It is passed the ZUserInterface object
-    // for this ZMachine and the filename of the story-file.
-    void initialize(String storyFilePath) {
-        ZStory story = fileLoader.load(storyFilePath);
-
-        if (story == ZStory.NOT_FOUND) {
-            userInterface.fatal("Story file '" + storyFilePath + "' not found.");
-        } else {
-            data = story.getStory();
-            dataLength = story.getStory().length;
-        }
     }
 
     int fetchByte(int address) {
@@ -74,7 +53,6 @@ public class ZMemory {
         }
     }
 
-    // Fetch a word from the specified address
     int fetchWord(int address) {
         if (address < 0 || address > (dataLength - 2)) {
             userInterface.fatal("Memory fault: address " + address);
@@ -84,7 +62,6 @@ public class ZMemory {
         }
     }
 
-    // Store a word at the specified address
     void putWord(int address, int word) {
         if (address < 0 || address > (dataLength - 2)) {
             userInterface.fatal("Memory fault: address " + address);

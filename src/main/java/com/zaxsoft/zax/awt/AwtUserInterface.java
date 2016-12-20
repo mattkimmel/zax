@@ -28,8 +28,6 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import com.zaxsoft.zax.zmachine.ZCPU;
-import com.zaxsoft.zax.zmachine.ZFileLoader;
-import com.zaxsoft.zax.zmachine.ZStory;
 import com.zaxsoft.zax.zmachine.ZUserInterface;
 
 /**

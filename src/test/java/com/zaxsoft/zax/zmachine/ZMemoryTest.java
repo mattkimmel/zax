@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -13,7 +12,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Random;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -23,19 +21,7 @@ public class ZMemoryTest {
     private static final int MEMORY_SIZE = 100;
     private static final int BYTE_LIMIT = 256;
     private static final int WORD_LIMIT = 65536;
-    private final ZFileLoader fileLoader = mock(ZFileLoader.class);
     private final ZUserInterface userInterface = mock(ZUserInterface.class);
-    private final ZMemory memory = new ZMemory(userInterface, fileLoader);
-
-    @Test
-    public void signalFileNotFoundToUserInterface() {
-        String path = RandomStringUtils.randomAlphanumeric(13);
-        when(fileLoader.load(path)).thenReturn(ZStory.NOT_FOUND);
-
-        memory.initialize(path);
-
-        verify(userInterface).fatal("Story file '" + path + "' not found.");
-    }
 
     @Test
     public void fetchByte() {

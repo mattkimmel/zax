@@ -22,7 +22,13 @@
 package com.zaxsoft.zax.zmachine;
 
 import java.awt.*;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -49,6 +55,7 @@ public class ZCPU implements Runnable {
     // Argument types
     private static final int ARGTYPE_BYTE = 0; // Byte
     private static final int ARGTYPE_WORD = 1; // Word
+    private final ZFileLoader fileLoader = new ZFileLoader();
 
     // Other objects associated with this ZMachine
     private ZMemory memory; // This ZMachine's memory
@@ -138,7 +145,11 @@ public class ZCPU implements Runnable {
         }
 
         this.storyFilePath = storyFilePath;
-        memory = new ZMemory(userInterface, new ZFileLoader().load(storyFilePath).getStory());
+        ZStory story = fileLoader.load(storyFilePath);
+        if (story == ZStory.NOT_FOUND) {
+            userInterface.fatal("Story file '" + storyFilePath + "' not found.");
+        }
+        memory = new ZMemory(userInterface, story.getStory());
 
         // First, initialize all of the objects.
         version = memory.fetchByte(0x00);
@@ -285,8 +296,7 @@ public class ZCPU implements Runnable {
 	}
 
 	// This method is called when the ZMachine thread is started.
-	public void run()
-	{
+	public void run() {
 		do {
 			// Reinitialize if this is a restart
 			if (restartFlag) {
