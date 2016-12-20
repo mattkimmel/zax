@@ -145,11 +145,12 @@ public class ZCPU implements Runnable {
         }
 
         this.storyFilePath = storyFilePath;
-        ZStory story = fileLoader.load(storyFilePath);
-        if (story == ZStory.NOT_FOUND) {
+        try {
+            ZStory story = fileLoader.load(storyFilePath);
+            memory = new ZMemory(userInterface, story.getStory());
+        } catch (RuntimeException exception) {
             userInterface.fatal("Story file '" + storyFilePath + "' not found.");
         }
-        memory = new ZMemory(userInterface, story.getStory());
 
         // First, initialize all of the objects.
         version = memory.fetchByte(0x00);
