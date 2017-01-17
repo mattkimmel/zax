@@ -27,28 +27,27 @@ import java.awt.image.FilteredImageSource;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-/* The TextScreen class is an extension of the Java AWT Component class which
-    provides the functionality of a text screen (similar to DOS in text mode),
-    which can print text and optionally scroll up or down.  Methods are also
-    provided to read and optionally echo keyboard input.  In addition, "regions"
-    may be defined such that the active region is the only area of the screen
-    affected by some operations such as clearing and scrolling.  This component
-    is designed for use with fixed-width fonts.  I make no guarantees about
-    its functionality when used with a proportional font.
+/** The TextScreen class is an extension of the Java AWT Component class which
+  * provides the functionality of a text screen (similar to DOS in text mode),
+  * which can print text and optionally scroll up or down.  Methods are also
+  * provided to read and optionally echo keyboard input.  In addition, "regions"
+  * may be defined such that the active region is the only area of the screen
+  * affected by some operations such as clearing and scrolling.  This component
+  * is designed for use with fixed-width fonts.  I make no guarantees about
+  * its functionality when used with a proportional font.
     
-    A TextScreen component may have various attributes associated with it.
-    These attributes may be set with the constructor or with the setAttributes
-    method, and may beretrieved with the getAttributes method.  Attributes are
-    int constants which or OR'd together to form an attribute word.  Attributes
-    include:
-        TextScreen.KEYECHO - Echo keyboard input during reads
-        TextScreen.CURSOR - Display a text cursor
-        TextScreen.AUTOWRAP - Wrap at end of line.  For best results, don't use this.
+  * A TextScreen component may have various attributes associated with it.
+  * These attributes may be set with the constructor or with the setAttributes
+  * method, and may beretrieved with the getAttributes method.  Attributes are
+  * int constants which or OR'd together to form an attribute word.  Attributes
+  * include:
+  *     TextScreen.KEYECHO - Echo keyboard input during reads
+  *     TextScreen.CURSOR - Display a text cursor
+  *     TextScreen.AUTOWRAP - Wrap at end of line.  For best results, don't use this.
         
-    @see java.awt.Canvas
-    @author Matt Kimmel
-*/
-
+  * @see java.awt.Canvas
+  * @author Matt Kimmel
+  */
 class TextScreen extends java.awt.Component
 {
     // Public constants
