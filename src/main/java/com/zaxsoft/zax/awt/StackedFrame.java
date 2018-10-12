@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2008 Matthew E. Kimmel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,33 +19,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zaxsoft.apps.zax;
+package com.zaxsoft.zax.awt;
 
 import java.awt.*;
 
 /**
- * Class containing information about the Z-Machine's logical
- * windows.  In the future, there may be more data here.
- *
  * @author Matt Kimmel
  */
-class ZaxWindow extends Object {
-    // Various state information maintained when window is not current
-    public Rectangle shape; // This Z-window's position and size
-    public Point cursorPosition; // Real cursor position associated with window
-    public int tstyle; // Current text style
-    // Constructor
-    public ZaxWindow()
-    {
-        shape = new Rectangle(0,0,0,0);
-        cursorPosition = new Point(0,0);
-        tstyle = 0;
-    }
+class StackedFrame extends java.awt.Frame {
+	// Paint all components in the proper order.
+	public void paintComponents(Graphics gc)
+	{
+		Component[] comps;
+		Graphics compgc;
+		Rectangle b;
+		
+		comps = getComponents();
+		for (int i = (comps.length - 1);i >= 0;i--) {
+			if (comps[i] == null)
+				continue;
+			b = comps[i].bounds();
+			compgc = gc.create(b.x,b.y,b.width,b.height);
+			comps[i].paintAll(compgc);
+			compgc.dispose();
+		}
+	}
 
-    public ZaxWindow(int x,int y,int w,int h)
-    {
-        shape = new Rectangle(x,y,w,h);
-        cursorPosition = new Point(0,0);
-        tstyle = 0;
-    }
+	// Print all components in the proper order.
+	public void printComponents(Graphics gc)
+	{
+		Component[] comps;
+		Graphics compgc;
+		Rectangle b;
+		
+		comps = getComponents();
+		for (int i = (comps.length - 1);i >= 0;i--) {
+			if (comps[i] == null)
+				continue;
+			b = comps[i].bounds();
+			compgc = gc.create(b.x,b.y,b.width,b.height);
+			comps[i].printAll(compgc);
+			compgc.dispose();
+		}
+	}
 }

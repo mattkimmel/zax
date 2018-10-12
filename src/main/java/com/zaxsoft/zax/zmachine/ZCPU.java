@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2008 Matthew E. Kimmel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,10 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zaxsoft.zmachine;
+package com.zaxsoft.zax.zmachine;
 
 import java.awt.*;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -37,18 +43,19 @@ import java.util.Vector;
  *
  * @author Matt Kimmel
  */
-public class ZCPU extends Object implements Runnable {
+public class ZCPU implements Runnable {
     // Private constants
     // Opcode types
-    private final int OPTYPE_0OP = 0; // 0OP opcode type
-    private final int OPTYPE_1OP = 1; // 1OP opcode type
-    private final int OPTYPE_2OP = 2; // 2OP opcode type
-    private final int OPTYPE_VAR = 3; // Variable opcode type
-    private final int OPTYPE_EXT = 4; // Extended opcode type
+    private static final int OPTYPE_0OP = 0; // 0OP opcode type
+    private static final int OPTYPE_1OP = 1; // 1OP opcode type
+    private static final int OPTYPE_2OP = 2; // 2OP opcode type
+    private static final int OPTYPE_VAR = 3; // Variable opcode type
+    private static final int OPTYPE_EXT = 4; // Extended opcode type
 
     // Argument types
-    private final int ARGTYPE_BYTE = 0; // Byte
-    private final int ARGTYPE_WORD = 1; // Word
+    private static final int ARGTYPE_BYTE = 0; // Byte
+    private static final int ARGTYPE_WORD = 1; // Word
+    private final ZFileLoader fileLoader = new ZFileLoader();
 
     // Other objects associated with this ZMachine
     private ZMemory memory; // This ZMachine's memory
@@ -56,10 +63,10 @@ public class ZCPU extends Object implements Runnable {
     private Stack callStack; // This ZMachine's call stack
     private ZRandom rndgen; // This ZMachine's random number generator
     private ZIOCard ioCard; // This ZMachine's I/O card
-    private ZUserInterface zui; // User interface supplied to constructor
+    private ZUserInterface userInterface; // User interface supplied to constructor
 
     // Private variables
-    private String curStoryFile; // The storyfile we're using
+    private String storyFilePath;
     private int version = 0; // Version of the game we're playing.
     private int programScale; // Scaling factor for this program
     private ZCallFrame curCallFrame; // Current call frame
@@ -90,28 +97,31 @@ public class ZCPU extends Object implements Runnable {
     private int alphabetU = 1;
     private int alphabetP = 2; // Set to 3 in V1
     private char[][] alphabet = {
-        { ' ','\0','\0','\0','\0','\0','a','b','c','d','e','f','g','h','i',
-          'j','k','l','m','n','o','p','q','r','s','t','u','v','w',
-          'x','y','z' },
-        { ' ','\0','\0','\0','\0','\0','A','B','C','D','E','F','G','H','I',
-          'J','K','L','M','N','O','P','Q','R','S','T','U','V','W',
-          'X','Y','Z' },
-        { ' ','\0','\0','\0','\0','\0','\0','\n','0','1','2','3','4','5','6','7',
-          '8','9','.',',','!','?','_','#','\'','\"','/','\\','-',
-          ':','(',')'},
-        { ' ','\0','\0','\0','\0','\0','\0','0','1','2','3','4','5','6','7',
-          '8','9','.',',','!','?','_','#','\'','\"','/','\\','<','-',
-          ':','(',')'}
+            {
+                    ' ', '\0', '\0', '\0', '\0', '\0',
+                    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+            },
+            {
+                    ' ', '\0', '\0', '\0', '\0', '\0',
+                    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+                    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+            },
+            {
+                    ' ', '\0', '\0', '\0', '\0', '\0', '\0', '\n',
+                    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                    '.', ',', '!', '?', '_', '#', '\'', '\"', '/', '\\', '-', ':', '(', ')'
+            },
+            {
+
+                    ' ', '\0', '\0', '\0', '\0', '\0', '\0',
+                    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                    '.', ',', '!', '?', '_', '#', '\'', '\"', '/', '\\', '<', '-', ':', '(', ')'
+            }
     };
 
-    // The constructor takes an object that implements the
-    // ZUserInterface interface as an argument, and initializes
-    // various variables and objects (but does not load or start
-    // a game).
-    public ZCPU(ZUserInterface ui)
-    {
-        zui = ui;
-        memory = new ZMemory();
+    public ZCPU(ZUserInterface userInterface) {
+        this.userInterface = userInterface;
         callStack = new Stack();
         rndgen = new ZRandom();
         ioCard = new ZIOCard();
@@ -122,8 +132,7 @@ public class ZCPU extends Object implements Runnable {
     // calls the initialize methods of the other objects; modifies
     // IROM as appropriate to the capabilities of the ZMachine and
     // the ZUserInterface.
-    public void initialize(String storyFile)
-    {
+    public void initialize(String storyFilePath) {
         int i;
         boolean transcriptOn = false;
 		Dimension s;
@@ -132,24 +141,25 @@ public class ZCPU extends Object implements Runnable {
         // If this is a restart, remember the value of the printer
         // transcript bit.
         if (restartFlag) {
-            if ((memory.fetchWord(0x10) & 0x01) == 0x01)
-                transcriptOn = true;
-            else
-                transcriptOn = false;
+            transcriptOn = (memory.fetchWord(0x10) & 0x01) == 0x01;
         }
 
-        // First, initialize all of the objects.  For the ZMemory
-        // object, this includes loading the game file.
-        curStoryFile = storyFile;
-        memory.initialize(zui,storyFile);
+        this.storyFilePath = storyFilePath;
+        try {
+            ZStory story = fileLoader.load(storyFilePath);
+            memory = new ZMemory(userInterface, story.getStory());
+        } catch (RuntimeException exception) {
+            userInterface.fatal("Story file '" + storyFilePath + "' not found.");
+        }
+
+        // First, initialize all of the objects.
         version = memory.fetchByte(0x00);
-        if ((version < 1) || (version > 8) || (version == 6))
-            zui.fatal("Unsupported storyfile version: " +
-                        String.valueOf(version) + ".");
-        zui.initialize(version);
-        rndgen.initialize(zui);
-        ioCard.initialize(zui,memory,version,true);
-        objTable.initialize(zui,memory,version);
+        if ((version < 1) || (version > 8) || (version == 6)) {
+            userInterface.fatal("Unsupported story file version: " + version + ".");
+        }
+        userInterface.initialize(version);
+        ioCard.initialize(userInterface,memory,version,true);
+        objTable.initialize(userInterface,memory,version);
 
         // Get the program scale
         if (version <= 3)
@@ -170,31 +180,31 @@ public class ZCPU extends Object implements Runnable {
 		// Set bits at 0x01 for V1-3 games
 		if (version <= 3) {
 	        i = i & ~0x08; // Tandy bit off
-		    if (zui.hasStatusLine())
+		    if (userInterface.hasStatusLine())
 			    i = i & ~0x10; // Status line not not available
 		    else
 			    i = i | 0x10; // Status line not available
-			if (zui.hasUpperWindow())
+			if (userInterface.hasUpperWindow())
 				i = i | 0x20; // Upper window available
 			else
 				i = i & ~0x20; // Upper window not available
-		    if (zui.defaultFontProportional())
+		    if (userInterface.defaultFontProportional())
 			    i = i | 0x40; // Default font is proportional
 			else
 				i = i & ~0x40; // Default font is fixed-width
 		}
 		else { // Set bits for V4+ games
-			if ((version >= 5) && (zui.hasColors()))
+			if ((version >= 5) && (userInterface.hasColors()))
 				i = i | 0x01;
 			// V6 picture bit at bit 1
-			if (zui.hasBoldface())
+			if (userInterface.hasBoldface())
 				i = i | 0x04;
-			if (zui.hasItalic())
+			if (userInterface.hasItalic())
 				i = i | 0x08;
-			if (zui.hasFixedWidth())
+			if (userInterface.hasFixedWidth())
 				i = i | 0x10;
 			// V6 sound bit at bit 5
-			if (zui.hasTimedInput())
+			if (userInterface.hasTimedInput())
 			    i = i | 0x80;
 		}
         memory.putByte(0x01,i);
@@ -205,20 +215,20 @@ public class ZCPU extends Object implements Runnable {
 			memory.putByte(0x1f,(byte)'A'); // Interpreter version
 
 			// Screen height and width in characters
-			s = zui.getScreenCharacters();
+			s = userInterface.getScreenCharacters();
 			memory.putByte(0x20,s.height);
 			memory.putByte(0x21,s.width);
 
 			// Screen height and width in units, font size in units, colors (V5+)
 			if (version >= 5) {
-				s = zui.getScreenUnits();
+				s = userInterface.getScreenUnits();
 				memory.putWord(0x22,s.width);
 				memory.putWord(0x24,s.height);
-				s = zui.getFontSize();
+				s = userInterface.getFontSize();
 				memory.putByte(0x26,s.height);
 				memory.putByte(0x27,s.width);
-				memory.putByte(0x2c,zui.getDefaultBackground());
-				memory.putByte(0x2d,zui.getDefaultForeground());
+				memory.putByte(0x2c, userInterface.getDefaultBackground());
+				memory.putByte(0x2d, userInterface.getDefaultForeground());
 			}
 		}
 
@@ -255,11 +265,11 @@ public class ZCPU extends Object implements Runnable {
                 int tc = memory.fetchByte(termChars);
                 Vector terminators = new Vector();
                 while (tc != 0) {
-                    terminators.addElement(new Integer(tc));
+                    terminators.addElement(tc);
                     i++;
                     tc = memory.fetchByte(termChars+i);
                 }
-                zui.setTerminatingCharacters(terminators);
+                userInterface.setTerminatingCharacters(terminators);
             }
         }
         
@@ -287,12 +297,11 @@ public class ZCPU extends Object implements Runnable {
 	}
 
 	// This method is called when the ZMachine thread is started.
-	public void run()
-	{
+	public void run() {
 		do {
 			// Reinitialize if this is a restart
 			if (restartFlag) {
-				initialize(curStoryFile);
+				initialize(storyFilePath);
 				restartFlag = false;
 			}
 
@@ -421,7 +430,7 @@ public class ZCPU extends Object implements Runnable {
                         curCallFrame.pc++;
                         break;
                     case 0xc0 : // An error
-                        zui.fatal("Error: Variable 2OP with no ops.");
+                        userInterface.fatal("Error: Variable 2OP with no ops.");
                 }
 
                 // Get the second operand
@@ -443,7 +452,7 @@ public class ZCPU extends Object implements Runnable {
                         curCallFrame.pc++;
                         break;
                     case 0x30 : // An error
-                        zui.fatal("Error: Variable 2OP with one op.");
+                        userInterface.fatal("Error: Variable 2OP with one op.");
                 }
 
                 curOpcodeType = OPTYPE_2OP;
@@ -541,7 +550,7 @@ public class ZCPU extends Object implements Runnable {
             }
             else
                 // This should never happen.
-                zui.fatal("Malformed instruction: " + curInstruction);
+                userInterface.fatal("Malformed instruction: " + curInstruction);
 
             ///////////////////////////////////////////////////////////
             // Dispatch the instruction.
@@ -566,7 +575,7 @@ public class ZCPU extends Object implements Runnable {
                                 else if (version == 4)
                                     getResult();
                                 else
-                                    zui.fatal("SAVE 0OP unsupported after version 4.");
+                                    userInterface.fatal("SAVE 0OP unsupported after version 4.");
                                 zop_save();
                                 break;
                     case 0x06 : if (version < 4)
@@ -574,7 +583,7 @@ public class ZCPU extends Object implements Runnable {
                                 else if (version == 4)
                                     getResult();
                                 else
-                                    zui.fatal("RESTORE 0OP unsupported after version 4.");
+                                    userInterface.fatal("RESTORE 0OP unsupported after version 4.");
                                 zop_restore();
                                 break;
                     case 0x07 : zop_restart();
@@ -598,11 +607,11 @@ public class ZCPU extends Object implements Runnable {
                                 zop_verify();
                                 break;
                     case 0x0e : // Start of extended instruction
-                                zui.fatal("Found opcode 0xBE in 0OP dispatcher");
+                                userInterface.fatal("Found opcode 0xBE in 0OP dispatcher");
                     case 0x0f : getBranch();
                                 zop_piracy();
                                 break;
-                    default : zui.fatal("Unknown 0OP - probably a bug.");
+                    default : userInterface.fatal("Unknown 0OP - probably a bug.");
                 }
             }
             else if (curOpcodeType == OPTYPE_1OP) {
@@ -654,13 +663,13 @@ public class ZCPU extends Object implements Runnable {
                                 else
                                     zop_call_p0();
 								break;
-                    default : zui.fatal("Unknown 1OP - probably a bug.");
+                    default : userInterface.fatal("Unknown 1OP - probably a bug.");
                 }
             }
             else if (curOpcodeType == OPTYPE_2OP) {
                 // 2OP opcodes
                 switch (curOpcode) {
-                    case 0x00 : zui.fatal("Unspecified instruction: " + curInstruction);
+                    case 0x00 : userInterface.fatal("Unspecified instruction: " + curInstruction);
                     case 0x01 : getBranch();
                                 zop_je();
                                 break;
@@ -740,8 +749,8 @@ public class ZCPU extends Object implements Runnable {
                                 break;
                     case 0x1d :
                     case 0x1e :
-                    case 0x1f : zui.fatal("Unspecified instruction: " + curInstruction);
-                    default : zui.fatal("Unknown 2OP.  Probably a bug.");
+                    case 0x1f : userInterface.fatal("Unspecified instruction: " + curInstruction);
+                    default : userInterface.fatal("Unknown 2OP.  Probably a bug.");
                 }
             }
             else if (curOpcodeType == OPTYPE_VAR) {
@@ -823,7 +832,7 @@ public class ZCPU extends Object implements Runnable {
                     case 0x1f : getBranch();
                                 zop_check_arg_count();
                                 break;
-                    default : zui.fatal("Unknown VAR - probably a bug.");
+                    default : userInterface.fatal("Unknown VAR - probably a bug.");
                 }
             }
             else if (curOpcodeType == OPTYPE_EXT) {
@@ -863,7 +872,7 @@ public class ZCPU extends Object implements Runnable {
                     case 0x0c :
                     case 0x0d :
                     case 0x0e :
-                    case 0x0f : zui.fatal("Unspecified EXT instruction: " + curOpcode);
+                    case 0x0f : userInterface.fatal("Unspecified EXT instruction: " + curOpcode);
                     case 0x10 : zop_move_window();
                                 break;
                     case 0x11 : zop_window_size();
@@ -893,11 +902,11 @@ public class ZCPU extends Object implements Runnable {
                                 break;
                     case 0x1c : zop_picture_table();
                                 break;
-                    default : zui.fatal("Unspecified EXT instruction: " + curOpcode);
+                    default : userInterface.fatal("Unspecified EXT instruction: " + curOpcode);
                 }
             }
             else
-                zui.fatal("Unknown instruction: " + curInstruction);
+                userInterface.fatal("Unknown instruction: " + curInstruction);
 
             if (decode_ret_flag) {
                 // An instruction has indicated that this decodeLoop
@@ -1273,7 +1282,7 @@ public class ZCPU extends Object implements Runnable {
     {
         if (v == 0) { // The top of the routine stack
             if (curCallFrame.routineStack.empty())
-                zui.fatal("Routine stack underflow");
+                userInterface.fatal("Routine stack underflow");
             else {
                 Integer i = (Integer)curCallFrame.routineStack.pop();
                 return (i.intValue());
@@ -1288,7 +1297,7 @@ public class ZCPU extends Object implements Runnable {
             return (memory.fetchWord(globalVars + ((v - 16) * 2)));
 
         // If we get here, something's wrong.
-        zui.fatal("Unspecified variable referenced");
+        userInterface.fatal("Unspecified variable referenced");
         return(0); // To make javac happy
     }
 
@@ -1308,7 +1317,7 @@ public class ZCPU extends Object implements Runnable {
         else if ((v >= 16) && (v <= 255)) // Global variable
             memory.putWord((globalVars + ((v - 16) * 2)),value);
         else
-            zui.fatal("Unspecified variable referenced");
+            userInterface.fatal("Unspecified variable referenced");
     }
 
     // Unpack a packed address.  raddr is true if this is a routine
@@ -1601,7 +1610,7 @@ public class ZCPU extends Object implements Runnable {
 		DataOutputStream dos;
 
 		// Get a filename to save under
-		fn = zui.getFilename("Save Game",null,true);
+		fn = userInterface.getFilename("Save Game",null,true);
 		if (fn == null) { // An error-probably user cancelled.
 			if (version <= 3)
 				dontBranch();
@@ -1642,7 +1651,7 @@ public class ZCPU extends Object implements Runnable {
 		int tsBit;
 
 		// Get a filename to restore from
-		fn = zui.getFilename("Restore Game",null,false);
+		fn = userInterface.getFilename("Restore Game",null,false);
 		if (fn == null) { // An error-probably user cancelled.
 			if (version >= 4)
 				putVariable(curResult,0);
@@ -1677,7 +1686,7 @@ public class ZCPU extends Object implements Runnable {
     private void zop_restart()
     {
 		// This will cause the decoder to exit and the ZMachine to restart
-		zui.restart();
+		userInterface.restart();
         restartFlag = true;
         return;
     }
@@ -1704,7 +1713,7 @@ public class ZCPU extends Object implements Runnable {
     // QUIT
     private void zop_quit()
     {
-        zui.quit();
+        userInterface.quit();
     }
 
     // NEW_LINE
@@ -1743,7 +1752,7 @@ public class ZCPU extends Object implements Runnable {
         b = signedWord(getVariable(18));
 
         // Pass it on to the user interface.
-        zui.showStatusBar(s,a,b,timegame);
+        userInterface.showStatusBar(s,a,b,timegame);
     }
 
     // VERIFY <branch>
@@ -1883,7 +1892,7 @@ public class ZCPU extends Object implements Runnable {
     {
         // First, make sure we *can* return.
         if (callStack.empty())
-            zui.fatal("Call stack underflow");
+            userInterface.fatal("Call stack underflow");
 
         // Now do the appropriate thing for each call type.
         if (curCallFrame.callType == ZCallFrame.PROCEDURE) {
@@ -1905,7 +1914,7 @@ public class ZCPU extends Object implements Runnable {
         }
 
         // If we make it here, something is wrong.
-        zui.fatal("Corrupted call frame");
+        userInterface.fatal("Corrupted call frame");
         return;
     }
 
@@ -2189,7 +2198,7 @@ public class ZCPU extends Object implements Runnable {
         int sop1, sop2;
 
         if (op2 == 0)
-            zui.fatal("Divide by zero");
+            userInterface.fatal("Divide by zero");
 
         sop1 = signedWord(op1);
 
@@ -2240,7 +2249,7 @@ public class ZCPU extends Object implements Runnable {
 			op1 = memory.fetchByte(0x2d);
 		if (op2 == 1)
 			op2 = memory.fetchByte(0x2c);
-		zui.setColor(op1,op2);
+		userInterface.setColor(op1,op2);
     }
 
     // THROW a fp       V5+
@@ -2251,7 +2260,7 @@ public class ZCPU extends Object implements Runnable {
 		while ((curCallFrame.frameNumber != op2) && (!callStack.empty()))
 			curCallFrame = (ZCallFrame)callStack.pop();
 		if (curCallFrame.frameNumber != op2) // Stack underflow
-			zui.fatal("THROW: Call stack underflow");
+			userInterface.fatal("THROW: Call stack underflow");
 
 		// We have the frame; now do a RET a
 		zop_ret();
@@ -2511,7 +2520,7 @@ public class ZCPU extends Object implements Runnable {
     private void zop_split_screen()
     {
         ioCard.outputFlush();
-        zui.splitScreen(vops[0]);
+        userInterface.splitScreen(vops[0]);
     }
 
     // SET_WINDOW window        V3+
@@ -2520,7 +2529,7 @@ public class ZCPU extends Object implements Runnable {
         ioCard.outputFlush();
 
         // In V6, -3 represents the current window
-        zui.setCurrentWindow(vops[0]);
+        userInterface.setCurrentWindow(vops[0]);
     }
 
     // CALL_FD raddr [a1 a2 a3 a4 a5 a6 a7] <result>    V4+
@@ -2537,22 +2546,22 @@ public class ZCPU extends Object implements Runnable {
 
 		sop1 = signedWord(vops[0]);
 		if (sop1 == -1) { // Erase everything, do a SPLIT_SCREEN 0
-			zui.eraseWindow(0);
-			zui.eraseWindow(1);
+			userInterface.eraseWindow(0);
+			userInterface.eraseWindow(1);
 			vops[0] = 0;
 			numvops = 1;
 			zop_split_screen();
 			return;
 		}
 		else // In V6, we'll have to handle -2 explicitly
-			zui.eraseWindow(vops[0]);
+			userInterface.eraseWindow(vops[0]);
     }
 
     // ERASE_LINE               V4-5,7-8
     // ERASE_LINE n             V6
     private void zop_erase_line()
     {
-		zui.eraseLine(1);
+		userInterface.eraseLine(1);
     }
 
     // SET_CURSOR s x           V4-5,7-8
@@ -2560,7 +2569,7 @@ public class ZCPU extends Object implements Runnable {
     private void zop_set_cursor()
     {
 		ioCard.outputFlush();
-		zui.setCursorPosition(vops[1],vops[0]);
+		userInterface.setCursorPosition(vops[1],vops[0]);
     }
 
     // GET_CURSOR baddr         V4+
@@ -2569,7 +2578,7 @@ public class ZCPU extends Object implements Runnable {
 		Point p;
 
 		ioCard.outputFlush();
-		p = zui.getCursorPosition();
+		p = userInterface.getCursorPosition();
 		memory.putWord(vops[0],p.y);
 		memory.putWord(vops[0]+2,p.x);
     }
@@ -2578,8 +2587,8 @@ public class ZCPU extends Object implements Runnable {
     private void zop_set_text_style()
     {
         ioCard.outputFlush();
-        zui.setTextStyle(vops[0]);
-		Dimension s = zui.getFontSize();
+        userInterface.setTextStyle(vops[0]);
+		Dimension s = userInterface.getFontSize();
 		memory.putByte(0x26,s.height);
 		memory.putByte(0x27,s.width);
     }
@@ -3048,7 +3057,7 @@ public class ZCPU extends Object implements Runnable {
             return;
 
         // Print the table
-        Point p = zui.getCursorPosition();
+        Point p = userInterface.getCursorPosition();
         baseX = p.x;
         curY = p.y;
         lineAddr = baddr;
@@ -3104,7 +3113,7 @@ public class ZCPU extends Object implements Runnable {
 			    suggested = tmp.toString();
     		}
     	}
-		fn = zui.getFilename("Save Auxiliary File",suggested,true);
+		fn = userInterface.getFilename("Save Auxiliary File",suggested,true);
 		if (fn == null) { // An error-probably user cancelled.
 			putVariable(curResult,0);
 			return;
@@ -3151,7 +3160,7 @@ public class ZCPU extends Object implements Runnable {
 			    suggested = tmp.toString();
 	    	}
 	    }
-		fn = zui.getFilename("Load Auxiliary File",suggested,false);
+		fn = userInterface.getFilename("Load Auxiliary File",suggested,false);
 		if (fn == null) { // An error-probably user cancelled.
 			putVariable(curResult,0);
 			return;
@@ -3214,8 +3223,8 @@ public class ZCPU extends Object implements Runnable {
     // SET_FONT n [window] <result>         V6
     private void zop_set_font()
     {
-		zui.setFont(vops[0]);
-		Dimension s = zui.getFontSize();
+		userInterface.setFont(vops[0]);
+		Dimension s = userInterface.getFontSize();
 		memory.putByte(0x26,s.height);
 		memory.putByte(0x27,s.width);
     }
@@ -3223,25 +3232,25 @@ public class ZCPU extends Object implements Runnable {
     // DRAW_PICTURE pic [y x]               V6
     private void zop_draw_picture()
     {
-        zui.fatal("DRAW_PICTURE instruction unimplemented");
+        userInterface.fatal("DRAW_PICTURE instruction unimplemented");
     }
 
     // PICTURE_DATA pic baddr <branch>      V6
     private void zop_picture_data()
     {
-        zui.fatal("PICTURE_DATA instruction unimplemented");
+        userInterface.fatal("PICTURE_DATA instruction unimplemented");
     }
 
     // ERASE_PICTURE pic [y x]              V6
     private void zop_erase_picture()
     {
-        zui.fatal("ERASE_PICTURE instruction unimplemented");
+        userInterface.fatal("ERASE_PICTURE instruction unimplemented");
     }
 
     // SET_MARGINS xl xr window             V6
     private void zop_set_margins()
     {
-        zui.fatal("SET_MARGINS instruction unimplemented");
+        userInterface.fatal("SET_MARGINS instruction unimplemented");
     }
 
     // SAVE_UNDO <result>                   V5+
@@ -3258,7 +3267,7 @@ public class ZCPU extends Object implements Runnable {
 		    undoState = bos.toByteArray();
         }
         catch (IOException ioex) {
-            zui.fatal("I/O exception during SAVE_UNDO??");
+            userInterface.fatal("I/O exception during SAVE_UNDO??");
         }
 
 		// We did it!
@@ -3285,7 +3294,7 @@ public class ZCPU extends Object implements Runnable {
 			memory.readMemory(dis,0,dynamicMemorySize);
 		}
 		catch (IOException ex1) {
-		    zui.fatal("I/O Exception during RESTORE_UNDO???");
+		    userInterface.fatal("I/O Exception during RESTORE_UNDO???");
 		}
 
 		// We did it!
@@ -3299,78 +3308,78 @@ public class ZCPU extends Object implements Runnable {
     // MOVE_WINDOW window y x               V6
     private void zop_move_window()
     {
-        zui.fatal("MOVE_WINDOW instruction unimplemented");
+        userInterface.fatal("MOVE_WINDOW instruction unimplemented");
     }
 
     // WINDOW_SIZE window y x               V6
     private void zop_window_size()
     {
-        zui.fatal("WINDOW_SIZE instruction unimplemented");
+        userInterface.fatal("WINDOW_SIZE instruction unimplemented");
     }
 
     // WINDOW_STYLE window flags op         V6
     private void zop_window_style()
     {
-        zui.fatal("WINDOW_STYLE instruction unimplemented");
+        userInterface.fatal("WINDOW_STYLE instruction unimplemented");
     }
 
     // GET_WIND_PROP window p <result>    V6
     private void zop_get_wind_prop()
     {
-        zui.fatal("GET_WINDOW_PROP instruction unimplemented");
+        userInterface.fatal("GET_WINDOW_PROP instruction unimplemented");
     }
 
     // SCROLL_WINDOW window s               V6
     private void zop_scroll_window()
     {
-        zui.fatal("SCROLL_WINDOW instruction unimplemented");
+        userInterface.fatal("SCROLL_WINDOW instruction unimplemented");
     }
 
     // POP_STACK n [baddr]                  V6
     private void zop_pop_stack()
     {
-        zui.fatal("POP_STACK instruction unimplemented");
+        userInterface.fatal("POP_STACK instruction unimplemented");
     }
 
     // READ_MOUSE baddr                     V6
     private void zop_read_mouse()
     {
-        zui.fatal("READ_MOUSE instruction unimplemented");
+        userInterface.fatal("READ_MOUSE instruction unimplemented");
     }
 
     // MOUSE_WINDOW window                  V6
     private void zop_mouse_window()
     {
-        zui.fatal("MOUSE_WINDOW instruction unimplemented");
+        userInterface.fatal("MOUSE_WINDOW instruction unimplemented");
     }
 
     // PUSH_STACK a baddr <branch>          V6
     private void zop_push_stack()
     {
-        zui.fatal("PUSH_STACK instruction unimplemented");
+        userInterface.fatal("PUSH_STACK instruction unimplemented");
     }
 
     // PUT_WIND_PROP window p a             V6
     private void zop_put_wind_prop()
     {
-        zui.fatal("PUT_WIND_PROP instruction unimplemented");
+        userInterface.fatal("PUT_WIND_PROP instruction unimplemented");
     }
 
     // PRINT_FORM baddr                     V6
     private void zop_print_form()
     {
-        zui.fatal("PRINT_FORM instruction unimplemented");
+        userInterface.fatal("PRINT_FORM instruction unimplemented");
     }
 
     // MAKE_MENU n baddr <branch>           V6
     private void zop_make_menu()
     {
-        zui.fatal("MAKE_MENU instruction unimplemented");
+        userInterface.fatal("MAKE_MENU instruction unimplemented");
     }
 
     // PICTURE_TABLE baddr                  V6
     private void zop_picture_table()
     {
-        zui.fatal("PICTURE_TABLE instruction unimplemented");
+        userInterface.fatal("PICTURE_TABLE instruction unimplemented");
     }
 }

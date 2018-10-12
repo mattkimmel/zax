@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2008 Matthew E. Kimmel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,11 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zaxsoft.apps.zax;
-
-import com.zaxsoft.awt.TextScreen;
-import com.zaxsoft.zmachine.ZCPU;
-import com.zaxsoft.zmachine.ZUserInterface;
+package com.zaxsoft.zax.awt;
 
 import java.awt.*;
 import java.util.Enumeration;
@@ -31,69 +27,54 @@ import java.util.Hashtable;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import com.zaxsoft.zax.zmachine.ZCPU;
+import com.zaxsoft.zax.zmachine.ZUserInterface;
+
 /**
  * Zax main class.
  *
  * @author Matt Kimmel
  */
-class Zax extends Frame implements ZUserInterface {
-	static String versionString = "0.91";
-    ZCPU cpu;
-    TextScreen screen; // The main screen
-    ZaxWindow[] windows;  // Z-Machine Windows.
-    ZaxWindow curWindow; // The current window.
-    ZaxWindow statusBar; // The status bar, in V1-3
-	Dimension screenSize; // Size of the entire screen in characters
-    int version = 0;    // Version of this storyfile - 0 if game not yet initialized.
-    int moreLines = 0; // Number of lines before next MORE
-    Hashtable inputCharacters; // Used to translate between Event input characters and Z-Machine input characters
-    Vector terminatingCharacters; // List of terminating characters for READ operations
-	Thread cpuThread = null; // Thread of ZMachine CPU
+public class AwtUserInterface extends Frame implements ZUserInterface {
+    private TextScreen screen; // The main screen
+    private AwtWindow[] windows;  // Z-Machine Windows.
+    private AwtWindow curWindow; // The current window.
+    private AwtWindow statusBar; // The status bar, in V1-3
+    private Dimension screenSize; // Size of the entire screen in characters
+    private int version = 0;    // Version of this story file - 0 if game not yet initialized.
+    private int moreLines = 0; // Number of lines before next MORE
+    private Hashtable inputCharacters; // Used to translate between Event input characters and Z-Machine input characters
+    private Vector terminatingCharacters; // List of terminating characters for READ operations
+    private Thread cpuThread = null; // Thread of ZMachine CPU
     
-    // Main routine.  Just instantiates the class.
-    public static void main(String args[])
-    {
-        Zax j = new Zax();
-    }
+    public void start(String zaxVersion) {
+        setTitle("Zax " + (zaxVersion.length() == 0 ? "" : "v" + zaxVersion));
 
-    // Constructor
-	public Zax()
-	{
-		// Set up the frame.
-		setTitle("Zax v" + versionString);
+        MenuBar menuBar = new MenuBar();
+        Menu menu = new Menu("File");
+        menu.add("Play Story...");
+        menu.addSeparator();
+        menu.add("Exit");
+        menuBar.add(menu);
+        setMenuBar(menuBar);
 
-		// Construct a menu bar
-		MenuBar mb = new MenuBar();
-		Menu m = new Menu("File");
-		m.add("Play Story...");
-		m.addSeparator();
-		m.add("Exit");
-		mb.add(m);
-//		m = new Menu("Help");
-//		m.add("About");
-//		mb.setHelpMenu(m);
-		setMenuBar(mb);
-        
-		// Put a screen up-this screen will be replaced later.
+        // Put a screen up-this screen will be replaced later.
         setResizable(false);
-        screen = new TextScreen(new Font("Monospaced",Font.PLAIN,12),
-                                Color.blue,Color.white,25,80,0);
+        screen = new TextScreen(new Font("Monospaced",Font.PLAIN,12), Color.blue, Color.white, 25, 80, 0);
         add(screen);
         Insets ins = getInsets();
         setSize(ins.left + ins.right + screen.getPreferredSize().width,
                 ins.top + ins.bottom + screen.getPreferredSize().height);
         show();
-	}
+    }
 
-	// Handle menu events
-	public boolean action(Event evt,Object what)
-	{
+    // Handle menu events
+	public boolean action(Event event, Object what) {
 		// See if this is a menu event
 		if ("Play Story...".equals(what)) { // Play a story file
 			playStory();
 			return true;
-		}
-		else if ("Exit".equals(what)) {
+		} else if ("Exit".equals(what)) {
 			System.exit(0);
 		}
 		
@@ -101,33 +82,36 @@ class Zax extends Frame implements ZUserInterface {
 	}
 
 	// Play a story file
-    private void playStory()
-    {
-		FileDialog fd;
-		String dir, file, pathname;
+    private void playStory() {
+        // If a story is already running, ignore this (for now)
+        if (cpuThread != null)
+            return;
 
-		// If a story is already running, ignore this (for now)
-		if (cpuThread != null)
-			return;
+        // Allow the user to select a story file
+        FileDialog fileDialog = new FileDialog(this, "Open a Story file", FileDialog.LOAD);
+        fileDialog.setVisible(true);
+        if (fileDialog.getDirectory() == null || fileDialog.getFile() == null) {
+            return;
+        }
+        String pathname =  fileDialog.getDirectory() + fileDialog.getFile();
 
-		// Create a ZMachine instance
-        cpu = new ZCPU(this);
-
-		// Allow the user to select a story file
-		fd = new FileDialog(this,"Open a Storyfile",FileDialog.LOAD);
-		fd.show();
-		dir = fd.getDirectory();
-		file = fd.getFile();
-		if ((dir == null) || (file == null))
-			return;
-		pathname = dir + file;
+        ZCPU cpu = new ZCPU(this);
 
         cpu.initialize(pathname);
         cpuThread = cpu.start();
 	}
 
+	private String promptForStoryFile() {
+        FileDialog fileDialog = new FileDialog(this, "Open a Story file", FileDialog.LOAD);
+        fileDialog.setVisible(true);
+        if (fileDialog.getDirectory() == null || fileDialog.getFile() == null) {
+            return "";
+        }
+        return fileDialog.getDirectory() + fileDialog.getFile();
+    }
+
     // Private method called when switching windows
-    private void switchWindow(ZaxWindow w)
+    private void switchWindow(AwtWindow w)
     {
         curWindow.cursorPosition = screen.getCursorPosition();
         curWindow = w;
@@ -209,9 +193,9 @@ class Zax extends Frame implements ZUserInterface {
         if ((this.version == 1) || (this.version == 2)) { // V1-2
             // For version 1-2, we set up a status bar and a
             // lower window.
-            statusBar = new ZaxWindow(0,0,screenSize.width,1);
-            windows = new ZaxWindow[1];
-            windows[0] = new ZaxWindow(0,1,screenSize.width,screenSize.height-1);
+            statusBar = new AwtWindow(0,0,screenSize.width,1);
+            windows = new AwtWindow[1];
+            windows[0] = new AwtWindow(0,1,screenSize.width,screenSize.height-1);
             
             // Start off in window 0
             curWindow = windows[0];
@@ -225,10 +209,10 @@ class Zax extends Frame implements ZUserInterface {
         if (this.version == 3) { // V3
             // For V3, we set up a status bar AND two windows.
             // This all may change.
-            statusBar = new ZaxWindow(0,0,screenSize.width,1);
-            windows = new ZaxWindow[2];
-            windows[1] = new ZaxWindow(0,1,screenSize.width,0);
-            windows[0] = new ZaxWindow(0,1,screenSize.width,screenSize.height-1);
+            statusBar = new AwtWindow(0,0,screenSize.width,1);
+            windows = new AwtWindow[2];
+            windows[1] = new AwtWindow(0,1,screenSize.width,0);
+            windows[0] = new AwtWindow(0,1,screenSize.width,screenSize.height-1);
 
             // Start off in window 0
             curWindow = windows[0];
@@ -243,9 +227,9 @@ class Zax extends Frame implements ZUserInterface {
 
         if (((this.version >= 4) && (this.version <= 8)) && (this.version != 6)) {
             // V4-5,7-8; Use an upper window and a lower window.
-            windows = new ZaxWindow[2];
-            windows[0] = new ZaxWindow(0,1,screenSize.width,screenSize.height-1);
-            windows[1] = new ZaxWindow(0,0,screenSize.width,1);
+            windows = new AwtWindow[2];
+            windows[0] = new AwtWindow(0,1,screenSize.width,screenSize.height-1);
+            windows[1] = new AwtWindow(0,0,screenSize.width,1);
 
             // Start off in window 0
             curWindow = windows[0];
@@ -366,7 +350,7 @@ class Zax extends Frame implements ZUserInterface {
     {
 		String status;
 		String s1, s2, s3;
-        ZaxWindow lastWindow;
+        AwtWindow lastWindow;
         
         // This is kinda hacky for now.
         lastWindow = curWindow;
@@ -483,7 +467,7 @@ class Zax extends Frame implements ZUserInterface {
 
     // Display a string -- this method does a number of things, including scrolling only
 	// as necessary, word-wrapping, and "more".
-    public void showString(String s)
+    public void showString(String string)
     {
 		Point cursor;
 		String outstr, curtoken;
@@ -494,7 +478,7 @@ class Zax extends Frame implements ZUserInterface {
 		// If this is not window 0, the output window, then we don't do any special
 		// handling.  Is this correct?  Probably not in V6.
 		if (curWindow != windows[0]) {
-			screen.printString(s);
+			screen.printString(string);
 			return;
 		}
 
@@ -512,7 +496,7 @@ class Zax extends Frame implements ZUserInterface {
 		// Now, go through the string as a series of tokens.  Word-wrap, scroll, and
 		// "more" as necessary.
 		outstr = new String();
-		intokens = new StringTokenizer(s,"\n ",true);
+		intokens = new StringTokenizer(string,"\n ",true);
 		while (intokens.hasMoreTokens()) {
 			curtoken = intokens.nextToken();
 			if (curtoken.equals("\n")) {
@@ -591,7 +575,7 @@ class Zax extends Frame implements ZUserInterface {
 	// Erase a window
 	public void eraseWindow(int window)
 	{
-	    ZaxWindow lastWindow;
+	    AwtWindow lastWindow;
 
 	    lastWindow = curWindow;
 	    switchWindow(windows[window]);

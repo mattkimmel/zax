@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2008 Matthew E. Kimmel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -13,53 +13,29 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zaxsoft.awt;
+package com.zaxsoft.zax.zmachine;
 
-import java.awt.*;
+import java.util.Random;
 
-/**
- * @author Matt Kimmel
- */
-public class StackedFrame extends java.awt.Frame {
-	// Paint all components in the proper order.
-	public void paintComponents(Graphics gc)
-	{
-		Component[] comps;
-		Graphics compgc;
-		Rectangle b;
-		
-		comps = getComponents();
-		for (int i = (comps.length - 1);i >= 0;i--) {
-			if (comps[i] == null)
-				continue;
-			b = comps[i].bounds();
-			compgc = gc.create(b.x,b.y,b.width,b.height);
-			comps[i].paintAll(compgc);
-			compgc.dispose();
-		}
-	}
+class ZRandom {
+    private Random random = new Random();
 
-	// Print all components in the proper order.
-	public void printComponents(Graphics gc)
-	{
-		Component[] comps;
-		Graphics compgc;
-		Rectangle b;
-		
-		comps = getComponents();
-		for (int i = (comps.length - 1);i >= 0;i--) {
-			if (comps[i] == null)
-				continue;
-			b = comps[i].bounds();
-			compgc = gc.create(b.x,b.y,b.width,b.height);
-			comps[i].printAll(compgc);
-			compgc.dispose();
-		}
-	}
+    // Seed the random number generator. If seed == 0, use an outside source.
+    void seed(int seed) {
+        if (seed == 0) {
+            random = new Random();
+        } else {
+            random = new Random((long) seed);
+        }
+    }
+
+    int getRandom(int inclusiveUpperBound) {
+        return random.nextInt(inclusiveUpperBound) + 1;
+    }
 }

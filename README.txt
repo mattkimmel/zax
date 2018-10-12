@@ -23,7 +23,7 @@ Zax is written entirely in Java, and should run on any Java Virtual Machine of v
 Please note that Zax is a Java application, not an applet, and is therefore not suitable for running in a browser.  Zax was developed independently of ZPlet, which is a Java applet implementation of the Z-Machine released around the same time as Zax's first release (circa 1997).
 
 
-USING ZAX
+USING ZAX (via official distribution)
 
 If you have retrieved the official Zax distribution, you should have a "bin" directory containing a complete binary JAR of Zax, called zax.jar.  To run Zax, you can use the command-line Java launcher included with the Java Runtime Environment, like this:
 
@@ -34,11 +34,17 @@ On some systems, you may also be able to double-click on the JAR file in a deskt
 Once Zax is running, just select Play Story... under the File menu and you're on your way.
 
 
+USING ZAX (via cloned source code)
+
+If you have cloned the source code and want to run Zax, you can use the Gradle run command:
+
+gradlew run
+
 BUILDING ZAX
 
-Zax comes with a very rudimentary ant build file.  You can build all the classes using a command like this:
+Zax comes with a Gradle build script.  You can build all the distribution jar using a command like this:
 
-ant -f zax.xml all
+gradlew clean build
 
 You can also create an Eclipse or IntelliJ IDEA or Netbeans (or IDE of your choice) project around the source files and build that way.  Zax currently has no dependencies outside of the standard Java libraries, which makes things easy.
 
@@ -52,7 +58,6 @@ The Zax user interface consists of two classes: Zax, which implements both a hig
 The ZMachine package consists of several classes.  ZMachine.ZCPU is the heart of the Z-Machine; it implements the CPU and all of its opcodes.  ZMemory is the Z-Machine's memory manager; it is responsible for initializing memory, encapsulating access to it, and dumping it to and reading it from a stream.  ZIOCard encapsulates the Z-Machine I/O streams (in most cases passing read and write requests to and from the user interface).  ZObjectTable encapsulates the Z-Machine's object table stuctures (including properties and attributes); it relies heavily on ZMemory to access the internal Z-Machine data associated with these structures.  ZCallFrame is a class which represents a frame on the Z-Machine call stack.  Finally, as mentioned above, ZUserInterface is an interface which must be implemented by user interface code.
 
 Full source code is included in the Zax distribution.  It is designed in such a way that enhancements could be made by subclassing existing code, rather than modifying it.
-
 
 BUGS
 

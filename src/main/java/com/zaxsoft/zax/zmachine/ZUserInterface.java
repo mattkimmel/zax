@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2008 Matthew E. Kimmel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.zaxsoft.zmachine;
+package com.zaxsoft.zax.zmachine;
 
 import java.awt.*;
 import java.util.Vector;
@@ -133,14 +133,14 @@ public interface ZUserInterface {
     int readChar(int time);
 
     // Print a string
-    void showString(String s);
+    void showString(String string);
 
     // This method scrolls the current window by the specified
     // number of lines.
     void scrollWindow(int lines);
 
     // This method erases a line in the current window.
-    void eraseLine(int s);
+    void eraseLine(int size);
 
 	// This method erases the current window.
 	void eraseWindow(int window);
@@ -156,7 +156,7 @@ public interface ZUserInterface {
     void quit();
 
 	// This function is called when the Z-Machine is about to
-	// restart.  The UI should prepare by reseting itself to
+	// restart.  The UI should prepare by resetting itself to
 	// an initial state.  The function should return.
 	void restart();
 }
